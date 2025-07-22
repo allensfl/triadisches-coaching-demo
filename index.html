@@ -112,7 +112,7 @@
 
         .client-card.selected {
             border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
             transform: translateY(-8px);
             box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
         }
@@ -154,30 +154,30 @@
         .start-button {
             display: block;
             width: 350px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 18px 35px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #ccc;
+            color: #666;
             border: none;
             border-radius: 50px;
             font-size: 1.3em;
             font-weight: 600;
-            cursor: pointer;
+            cursor: not-allowed;
             transition: all 0.3s ease;
-            opacity: 0.5;
-            pointer-events: none;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            text-align: center;
         }
 
         .start-button.active {
-            opacity: 1;
-            pointer-events: auto;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            transform: scale(1.05);
         }
 
-        .start-button:hover.active {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        .start-button.active:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
         }
 
         /* Dashboard Styles */
@@ -624,6 +624,24 @@
             display: block;
         }
 
+        /* Debug Info */
+        .debug-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            z-index: 999;
+            display: none;
+        }
+
+        .debug-info.show {
+            display: block;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .main-interface {
@@ -659,6 +677,7 @@
 </head>
 <body>
     <div id="apiStatus" class="api-status demo">🔄 KI wird getestet...</div>
+    <div id="debugInfo" class="debug-info"></div>
 
     <div class="container">
         <!-- Client Selection Screen -->
@@ -670,7 +689,7 @@
             </div>
 
             <div class="client-selection" id="clientCards">
-                <div class="client-card" data-client="sarah">
+                <div class="client-card" onclick="selectClient('sarah')">
                     <h3>👩‍💼 Sarah Weber</h3>
                     <div class="age">35 Jahre, Marketing-Managerin</div>
                     <div class="problem">
@@ -679,7 +698,7 @@
                     <div class="goal">🎯 Ziel: Klarheit über Karrierewechsel gewinnen</div>
                 </div>
 
-                <div class="client-card" data-client="marcus">
+                <div class="client-card" onclick="selectClient('marcus')">
                     <h3>👨‍🔧 Marcus Schmidt</h3>
                     <div class="age">48 Jahre, Ingenieur</div>
                     <div class="problem">
@@ -688,7 +707,7 @@
                     <div class="goal">🎯 Ziel: Neue Perspektiven und Mut für Veränderung</div>
                 </div>
 
-                <div class="client-card" data-client="lisa">
+                <div class="client-card" onclick="selectClient('lisa')">
                     <h3>👩‍⚕️ Dr. Lisa Müller</h3>
                     <div class="age">42 Jahre, Ärztin</div>
                     <div class="problem">
@@ -697,7 +716,7 @@
                     <div class="goal">🎯 Ziel: Nachhaltige Work-Life-Balance finden</div>
                 </div>
 
-                <div class="client-card" data-client="werner">
+                <div class="client-card" onclick="selectClient('werner')">
                     <h3>👨‍💼 Werner Hoffmann</h3>
                     <div class="age">62 Jahre, Abteilungsleiter</div>
                     <div class="problem">
@@ -707,7 +726,7 @@
                 </div>
             </div>
 
-            <button id="startButton" class="start-button">🚀 Coaching-Session starten</button>
+            <button id="startButton" class="start-button" onclick="startSession()">🚀 Coaching-Session starten</button>
         </div>
 
         <!-- Dashboard -->
@@ -741,6 +760,14 @@
                 <div class="tools-panel">
                     <div class="panel-header">🛠️ Coach-Tools</div>
                     <div class="coach-tools" id="coachTools"></div>
+                    
+                    <!-- Separates KI-Coach-Fenster -->
+                    <div class="tool-section" style="border: 2px solid #f59e0b; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                        <h4 style="color: #d97706;">🤖 KI-Coach-Anweisungen (nur für Sie)</h4>
+                        <div id="coachInstructions" style="font-size: 0.85em; line-height: 1.5; color: #92400e;">
+                            <p>Hier erscheinen unsichtbare Coaching-Anweisungen der KI für Sie als Coach.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -815,6 +842,15 @@
         let sessionStartTime = null;
         let apiConnected = false;
 
+        // Debug function
+        function debug(message) {
+            console.log('[DEBUG]', message);
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.innerHTML = message;
+            debugDiv.classList.add('show');
+            setTimeout(() => debugDiv.classList.remove('show'), 3000);
+        }
+
         // Client Data
         const clients = {
             sarah: {
@@ -859,91 +895,53 @@
             { id: 12, title: "Commitment", description: "Verbindlichkeit und nächste Schritte", prompt: "Stärke das Commitment für '[PROBLEMBESCHREIBUNG]'. Accountability-Partner, Belohnungen, Konsequenzen bei Nichtumsetzung. Nächste 3 Schritte: '[DETAILS]'." }
         ];
 
-        // Initialize App
+        // Initialize App when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
+            debug('DOM loaded, initializing app...');
             checkAPIStatus();
             updateTime();
             setInterval(updateTime, 1000);
+            generateStepsNavigation();
         });
 
-        function initializeApp() {
-            console.log('Initializing app...');
-            
-            // Client Selection Event Listeners
-            const clientCards = document.querySelectorAll('.client-card');
-            console.log('Found client cards:', clientCards.length);
-            
-            clientCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    console.log('Client card clicked:', card.dataset.client);
-                    selectClient(card.dataset.client);
-                });
-            });
-
-            // Start Button Event Listener  
-            const startButton = document.getElementById('startButton');
-            if (startButton) {
-                startButton.addEventListener('click', startSession);
-                console.log('Start button listener added');
-            }
-
-            // Generate Steps Navigation
-            generateStepsNavigation();
-            console.log('App initialized');
-        }
-
         function selectClient(clientId) {
-            console.log('Selecting client:', clientId);
-            console.log('Available clients:', Object.keys(clients));
-            console.log('Client data:', clients[clientId]);
+            debug(`Selecting client: ${clientId}`);
             
-            if (!clientId) {
-                console.error('No client ID provided');
-                return;
-            }
-            
-            if (!clients[clientId]) {
-                console.error('Client not found:', clientId);
-                console.error('Available clients:', Object.keys(clients));
+            if (!clientId || !clients[clientId]) {
+                debug(`Error: Client ${clientId} not found`);
                 return;
             }
             
             // Remove previous selection
-            const allCards = document.querySelectorAll('.client-card');
-            console.log('Found cards for deselection:', allCards.length);
-            allCards.forEach(card => {
+            document.querySelectorAll('.client-card').forEach(card => {
                 card.classList.remove('selected');
             });
 
             // Add selection to clicked card
-            const selectedCard = document.querySelector(`[data-client="${clientId}"]`);
-            console.log('Found selected card:', selectedCard);
+            const selectedCard = document.querySelector(`[onclick="selectClient('${clientId}')"]`);
             if (selectedCard) {
                 selectedCard.classList.add('selected');
-                console.log('Client card selected:', clientId);
-            } else {
-                console.error('Could not find card with data-client:', clientId);
+                debug(`Client ${clientId} visually selected`);
             }
             
             selectedClient = clientId;
-            console.log('Global selectedClient set to:', selectedClient);
             
             // Activate start button
             const startButton = document.getElementById('startButton');
-            console.log('Found start button:', startButton);
             if (startButton) {
                 startButton.classList.add('active');
                 startButton.textContent = `🚀 Session mit ${clients[clientId].name} starten`;
-                console.log('Start button activated with text:', startButton.textContent);
-                console.log('Start button classes:', startButton.className);
-            } else {
-                console.error('Start button not found!');
+                debug(`Start button activated for ${clients[clientId].name}`);
             }
         }
 
         function startSession() {
-            if (!selectedClient) return;
+            debug('Starting session...');
+            
+            if (!selectedClient) {
+                debug('No client selected!');
+                return;
+            }
 
             sessionStartTime = new Date();
             
@@ -964,10 +962,13 @@
 
             // Set current step
             setCurrentStep(1);
+            debug('Session started successfully');
         }
 
         function generateStepsNavigation() {
             const stepsGrid = document.getElementById('stepsGrid');
+            if (!stepsGrid) return;
+            
             stepsGrid.innerHTML = '';
 
             coachingSteps.forEach(step => {
@@ -987,16 +988,23 @@
             document.querySelectorAll('.step-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`[data-step="${stepId}"]`).classList.add('active');
+            const activeBtn = document.querySelector(`[data-step="${stepId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
 
             // Update current step info
             const step = coachingSteps.find(s => s.id === stepId);
-            updateCurrentStepInfo(step);
-            updateCoachTools(step);
+            if (step) {
+                updateCurrentStepInfo(step);
+                updateCoachTools(step);
+            }
         }
 
         function updateCurrentStepInfo(step) {
             const stepInfo = document.getElementById('currentStepInfo');
+            if (!stepInfo) return;
+            
             stepInfo.innerHTML = `
                 <div class="step-title">Schritt ${step.id}: ${step.title}</div>
                 <div class="step-description">${step.description}</div>
@@ -1009,6 +1017,8 @@
 
         function updateCoachTools(step) {
             const coachTools = document.getElementById('coachTools');
+            if (!coachTools) return;
+            
             coachTools.innerHTML = `
                 <div class="tool-section">
                     <h4>🎯 Aktueller Fokus</h4>
@@ -1077,7 +1087,6 @@
             document.getElementById('loadingIndicator').classList.add('show');
             document.getElementById('kiResponseSection').classList.remove('show');
 
-            // Try real KI first
             try {
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error('Timeout')), 8000)
@@ -1112,10 +1121,10 @@
                 // Fallback to high-quality demo response
                 document.getElementById('loadingIndicator').classList.remove('show');
                 const fallbackResponse = generateSmartFallbackResponse(currentEditingStep, selectedClient, var1, var2, var3);
-                document.getElementById('kiResponseText').textContent = fallbackResponse;
+                document.getElementById('kiResponseText').innerHTML = fallbackResponse;
                 document.getElementById('kiResponseSection').classList.add('show');
                 updateAPIStatus('demo');
-                console.log('Using intelligent fallback response:', error.message);
+                debug('Using intelligent fallback response');
             }
         }
 
@@ -1125,260 +1134,49 @@
             const details = var2 || clients[client].background;
             
             const smartResponses = {
-                1: `**Coaching-Ziel für ${clientName} definieren:**
+                1: `Liebe ${clientName.split(' ')[1] || clientName}, vielen Dank für Ihr Vertrauen und Ihre Offenheit.<br><br>
+Ich verstehe Ihre Situation sehr gut: ${problem.toLowerCase()}. Das ist eine Herausforderung, mit der viele erfolgreiche Menschen in verantwortungsvollen Positionen kämpfen.<br><br>
+Was ich besonders an Ihnen schätze: Sie haben den Mut, ehrlich hinzuschauen und Veränderung zu suchen. Das zeigt große Selbstreflexion und Stärke. ${details.includes('liebt') ? 'Ihre Leidenschaft für Ihren Beruf ist spürbar - das ist ein wertvolles Fundament.' : 'Ihre langjährige Erfahrung ist ein enormer Schatz.'}<br><br>
+Gemeinsam können wir einen Weg finden, der sowohl Ihre berufliche Erfüllung als auch Ihr persönliches Wohlbefinden berücksichtigt. Sie haben bereits den wichtigsten Schritt getan: Sie haben erkannt, dass etwas verändert werden sollte.<br><br>
+Lassen Sie uns gemeinsam schauen, wie Ihr ideales Leben aussehen könnte. Was würde sich für Sie anfühlen wie ein echter Erfolg?`,
 
-Basierend auf "${problem}" erkenne ich folgende Kernthemen:
-• Hauptherausforderung: ${problem}
-• Kontext: ${details}
+                2: `Liebe ${clientName.split(' ')[1] || clientName}, ich höre aus Ihren Worten sowohl Ihre Belastung als auch Ihre Stärke heraus.<br><br>
+${problem.includes('Balance') ? 'Die Herausforderung zwischen Karriere und Familie zu jonglieren, zeigt mir, wie wichtig Ihnen beide Lebensbereiche sind. Das ist keine Schwäche, sondern ein Zeichen Ihrer Werte.' : 'Ihre ehrliche Selbstreflexion über Ihre aktuelle Situation beeindruckt mich.'}<br><br>
+Was ich besonders bemerkenswert finde: ${details.includes('liebt') ? 'Sie lieben Ihren Beruf - das ist ein Geschenk, das nicht jeder hat.' : 'Sie haben die Erfahrung und Expertise aufgebaut, die Ihnen Optionen eröffnet.'} Gleichzeitig sind Sie aufmerksam für Ihre eigenen Bedürfnisse und die Ihrer Familie.<br><br>
+Sie sind nicht "gescheitert" oder "zu schwach" - Sie sind an einem Punkt angekommen, wo Ihre Werte nach neuen Lösungen rufen. Das ist völlig normal und sogar ein Zeichen von Reife und Weisheit.<br><br>
+Wie fühlt es sich für Sie an, wenn Sie daran denken, dass es durchaus möglich ist, beides zu haben - berufliche Erfüllung UND ein erfülltes Privatleben?`,
 
-**Präzise Coaching-Fragen:**
-1. "Wenn Sie in 6 Monaten zurückblicken - was muss sich konkret verändert haben, damit Sie sagen: 'Das Coaching war erfolgreich'?"
-2. "Auf einer Skala von 1-10: Wie klar ist Ihnen aktuell der nächste Schritt?"
-3. "Was wäre das Schlimmste, was passieren könnte, wenn Sie nichts ändern?"
-
-**Messbares Ziel:** Eine klare Entscheidung mit konkretem Umsetzungsplan in den nächsten 4 Wochen.`,
-
-                2: `**IST-Zustand Analyse für ${clientName}:**
-
-**Aktuelle Situation:**
-• Hauptbelastung: ${problem}
-• Hintergrund: ${details}
-
-**Auswirkungen auf verschiedene Lebensbereiche:**
-• Beruflich: Unzufriedenheit und fehlende Erfüllung
-• Emotional: Innerer Konflikt zwischen Sicherheit und Wachstum
-• Sozial: Möglicherweise Spannungen im persönlichen Umfeld
-• Gesundheit: Stress durch ungelöste Entscheidung
-
-**Emotionale Bewertung:** Frustration, Ungewissheit, aber auch Hoffnung auf Veränderung.
-**Dringlichkeit:** Mittel bis hoch - die Belastung steigt.`,
-
-                3: `**SOLL-Zustand Vision für ${clientName}:**
-
-**Konkrete Zukunftsvision:**
-Wenn "${problem}" gelöst wäre, sähe der Alltag so aus:
-• Morgens: Motivation und Vorfreude auf den Arbeitstag
-• Beruflich: Sinnvolle Tätigkeit, die mit persönlichen Werten übereinstimmt
-• Emotional: Innere Ruhe und Selbstvertrauen in Entscheidungen
-• Finanziell: Nachhaltige Sicherheit bei erfüllender Arbeit
-
-**Messbare Erfolgskriterien:**
-1. Klarheit über berufliche Richtung (bis in 4 Wochen)
-2. Konkrete erste Schritte definiert (bis in 6 Wochen)
-3. Stress-Level reduziert von aktuell 8/10 auf 4/10
-4. Stolz auf getroffene Entscheidung`,
-
-                4: `**Hindernis-Analyse für ${clientName}:**
-
-**Interne Blockaden:**
-• Verlustangst: "Was, wenn ich die falsche Entscheidung treffe?"
-• Perfektionismus: Warten auf den "perfekten" Moment
-• Glaubenssatz: "Sicherheit geht vor Erfüllung"
-• Selbstzweifel: "Bin ich gut genug für etwas Neues?"
-
-**Externe Barrieren:**
-• Finanzielle Verpflichtungen
-• Erwartungen des sozialen Umfelds
-• Marktbedingungen im Zielbereich
-• Zeitliche Constraints
-
-**Prioritäts-Ranking:**
-1. Verlustangst (höchster Einfluss)
-2. Finanzielle Sicherheit
-3. Selbstzweifel
-4. Äußere Erwartungen`,
-
-                5: `**Ressourcen-Inventar für ${clientName}:**
-
-**Persönliche Stärken:**
-• 10+ Jahre Berufserfahrung als solide Basis
-• Bewusstsein für persönliche Werte (Nachhaltigkeit/Erfüllung)
-• Mut, überhaupt eine Veränderung zu erwägen
-• Analytische Fähigkeiten für Entscheidungsfindung
-
-**Soziales Netzwerk:**
-• Berufliche Kontakte in verschiedenen Branchen
-• Familie/Freunde als emotionale Unterstützung
-• Potentielle Mentoren im Zielbereich
-
-**Materielle Ressourcen:**
-• Finanzielle Rücklagen für Übergangszeit
-• Marktgängige Qualifikationen
-• Digitale Tools für Networking und Weiterbildung
-
-**Verfügbare Zeit:** ${details.includes('unterfordert') ? 'Freiräume durch Unterforderung' : 'Abends/Wochenenden für Vorbereitung'}`,
-
-                6: `**Innere Stimmen Analyse für ${clientName}:**
-
-**Identifizierte Anteile:**
-1. **Der Sicherheits-Wächter:** "Bleib, wo du bist - es ist sicher hier!"
-2. **Der Träumer:** "Du könntest so viel mehr erreichen!"
-3. **Der Kritiker:** "Andere schaffen das, warum zögerst du?"
-4. **Der Weise:** "Welcher Weg führt zu echter Erfüllung?"
-
-**Innerer Dialog:**
-Sicherheits-Wächter vs. Träumer: Konstanter Kampf zwischen Risiko und Chance
-Der Kritiker verstärkt den Druck, während der Weise nach Balance sucht.
-
-**Moderations-Ansatz:**
-- Alle Stimmen anhören und würdigen
-- Gemeinsame Werte identifizieren
-- Kompromiss-Lösungen entwickeln
-- Den Weisen als Mediator stärken`,
-
-                7: `**Lösungsoptionen für ${clientName}:**
-
-**Option 1 - Sanfter Übergang:**
-Schrittweise Reduzierung der aktuellen Rolle, parallel Aufbau im Zielbereich
-Pro: Geringeres Risiko | Contra: Langsamerer Fortschritt
-
-**Option 2 - Kompletter Wechsel:**
-Kündigung und Vollzeit-Einstieg in neuen Bereich
-Pro: Schnelle Klarheit | Contra: Höheres finanzielles Risiko
-
-**Option 3 - Sabbatical/Auszeit:**
-3-6 Monate Pause zur Orientierung und Weiterbildung
-Pro: Zeit für Reflexion | Contra: Einkommensverlust
-
-**Option 4 - Interne Neuorientierung:**
-Neue Projekte/Abteilung im aktuellen Unternehmen
-Pro: Sicherheit + Veränderung | Contra: Begrenzte Möglichkeiten
-
-**Option 5 - Hybridmodell:**
-Teilzeit aktueller Job + Teilzeit neuer Bereich
-Pro: Beste aus beiden Welten | Contra: Hohe Arbeitsbelastung`,
-
-                8: `**Pro/Contra Analyse für ${clientName}:**
-
-**Bewertungskriterien gewichtet:**
-- Umsetzbarkeit (25%)
-- Finanzielles Risiko (30%) 
-- Erfüllungspotential (25%)
-- Zeitaufwand (20%)
-
-**Option-Bewertung (1-5 Sterne):**
-
-**Sanfter Übergang:** ⭐⭐⭐⭐
-+ Machbar und risikoarm
-- Dauert länger bis zur Erfüllung
-
-**Kompletter Wechsel:** ⭐⭐⭐
-+ Maximale Erfüllung
-- Hohes finanzielles Risiko
-
-**Sabbatical:** ⭐⭐⭐⭐
-+ Zeit für fundierte Entscheidung
-- Temporärer Einkommensverlust
-
-**Empfehlung:** Hybrid aus sanftem Übergang mit geplanter Auszeit zur Weiterbildung`,
-
-                9: `**Entscheidungs-Unterstützung für ${clientName}:**
-
-**Bauchgefühl vs. Vernunft:**
-- Bauchgefühl sagt: "${problem.includes('unterfordert') ? 'Zeit für Veränderung!' : 'Erfüllung ist wichtig!'}"
-- Vernunft sagt: "Sicherheit nicht leichtfertig aufgeben"
-
-**Werte-Abgleich:**
-Die Option "Sanfter Übergang" passt am besten zu Ihren Kernwerten:
-• Nachhaltigkeit (auch in der Lebensplanung)
-• Verantwortung (für finanzielle Verpflichtungen)
-• Wachstum (persönliche Entwicklung)
-
-**Entscheidungs-Impuls:**
-"Was würde das 80-jährige Ich Ihnen raten?"
-Wahrscheinlich: "Hab Mut, aber sei klug dabei."
-
-**Empfehlung:** Starten Sie in den nächsten 2 Wochen mit der Vorbereitung für den sanften Übergang.`,
-
-                10: `**Maßnahmenplan für ${clientName}:**
-
-**72-Stunden-Aktionen:**
-1. Finanzcheck: Wie lange können Sie ohne aktuelles Gehalt leben?
-2. Netzwerk aktivieren: 3 Kontakte im Zielbereich kontaktieren
-3. Skill-Gap-Analyse: Welche Qualifikationen fehlen noch?
-
-**SMART-Ziele (nächste 4 Wochen):**
-- **S**pezifisch: 10 informative Gespräche mit Profis im Zielbereich
-- **M**essbar: Bewerbungsunterlagen für neue Richtung erstellen
-- **A**ttraktiv: Vision Board für neuen Lebensabschnitt
-- **R**ealistisch: Parallele Weiterbildung starten
-- **T**erminiert: Bis [Datum in 4 Wochen]
-
-**Erste konkrete Schritte:**
-1. LinkedIn-Profil aktualisieren
-2. Branchenveranstaltungen recherchieren
-3. Finanzberater Termin vereinbaren`,
-
-                11: `**Timeline für ${clientName}:**
-
-**Phase 1 (Woche 1-4): Vorbereitung**
-- Netzwerk aktivieren und informative Gespräche
-- Skill-Assessment und Weiterbildungsplan
-- Finanzielle Planung
-
-**Phase 2 (Woche 5-12): Orientierung**
-- Praktika/Hospitationen im Zielbereich
-- Erste Bewerbungen/Sondierungen
-- Reduzierung aktueller Belastung
-
-**Phase 3 (Woche 13-26): Übergang**
-- Konkrete Angebote evaluieren
-- Verhandlungen mit aktuellem AG
-- Schrittweise Übergabe
-
-**Meilensteine:**
-✓ Woche 2: Klarheit über Zielbereich
-✓ Woche 6: Erste konkrete Kontakte
-✓ Woche 12: Machbare Option identifiziert
-✓ Woche 20: Entscheidung getroffen
-✓ Woche 26: Übergang vollzogen
-
-**Pufferzeiten:** +2 Wochen pro Phase für unvorhergesehene Ereignisse`,
-
-                12: `**Commitment-Stärkung für ${clientName}:**
-
-**Accountability-System:**
-- **Partner:** Vertraute Person als wöchentlicher Check-in
-- **Coach:** Monatliche Zwischenreflexion
-- **Selbst:** Tägliches 5-Minuten-Journal zum Fortschritt
-
-**Belohnungen bei Meilenstei-Erreichung:**
-• Woche 4: Besonderes Dinner in Lieblingsrestaurant
-• Woche 12: Wellness-Wochenende
-• Woche 26: Kurzurlaub zur Feier des Übergangs
-
-**Konsequenzen bei Stillstand:**
-- Nach 2 Wochen ohne Fortschritt: Ehrliche Reflexion mit Accountability-Partner
-- Öffentliches Commitment (Familie/Freunde informieren)
-- Professionelle Coaching-Unterstützung intensivieren
-
-**Nächste 3 konkrete Schritte:**
-1. **Heute:** Accountability-Partner bestimmen und kontaktieren
-2. **Diese Woche:** Ersten informativen Gesprächstermin vereinbaren  
-3. **Bis Ende Monat:** Detaillierteren Finanzplan erstellen
-
-**Commitment-Satz:** "Ich verpflichte mich, in den nächsten 6 Monaten konkrete Schritte für meine berufliche Erfüllung zu gehen, auch wenn es bedeutet, meine Komfortzone zu verlassen."`
+                3: `${clientName.split(' ')[1] || clientName}, lassen Sie uns gemeinsam ein Bild Ihrer Zukunft malen - eine Zukunft, in der Sie sich rundherum wohl fühlen.<br><br>
+Stellen Sie sich vor, Sie wachen morgens auf und freuen sich auf den Tag. ${problem.includes('Balance') ? 'Sie haben Zeit für Ihre Familie UND fühlen sich beruflich erfüllt.' : 'Sie gehen zur Arbeit mit dem Gefühl, dass das, was Sie tun, wirklich zu Ihnen passt.'}<br><br>
+Was ich an Ihnen sehe: Sie haben bereits bewiesen, dass Sie Herausforderungen meistern können. ${details.includes('jahrelang') || details.includes('Jahre') ? 'Ihre langjährige Erfahrung ist ein Beweis Ihrer Kompetenz und Ausdauer.' : 'Ihr Durchhaltevermögen und Ihre Fähigkeiten sind offensichtlich.'}<br><br>
+In Ihrer idealen Zukunft - wie würde ein typischer Tag aussehen? Womit würden Sie Ihre Zeit verbringen? Wie würden sich die Menschen in Ihrem Leben fühlen?<br><br>
+Sie haben das Recht auf ein Leben, das sich stimmig anfühlt. Und Sie haben definitiv die Fähigkeiten, es zu erreichen.`
             };
             
-            return smartResponses[step] || `**Professionelle Coaching-Analyse - Schritt ${step}**
-
-Für ${clientName} mit der Herausforderung "${problem}" empfehle ich:
-
-${step <= 4 ? 'In dieser Analysephase' : step <= 8 ? 'In dieser Entwicklungsphase' : 'In dieser Umsetzungsphase'} ist es wichtig, systematisch vorzugehen. 
-
-Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
-• Strukturierte Herangehensweise an die Problemstellung
-• Berücksichtigung emotionaler und praktischer Aspekte  
-• Entwicklung konkreter, umsetzbarer Lösungsschritte
-
-**Nächste Schritte:** Vertiefen Sie die Reflexion mit gezielten Fragen und entwickeln Sie gemeinsam mit Ihrem Klienten praktikable Ansätze.
-
-*Diese Demo-Antwort zeigt die Art der KI-Unterstützung. In der Live-Version würden hier noch detailliertere, personalisierte Analysen erscheinen.*`;
+            return smartResponses[step] || `<strong>Professionelle Coaching-Analyse - Schritt ${step}</strong><br><br>
+Für ${clientName} mit der Herausforderung "${problem}" empfehle ich:<br><br>
+${step <= 4 ? 'In dieser Analysephase' : step <= 8 ? 'In dieser Entwicklungsphase' : 'In dieser Umsetzungsphase'} ist es wichtig, systematisch vorzugehen.<br><br>
+Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:<br>
+• Strukturierte Herangehensweise an die Problemstellung<br>
+• Berücksichtigung emotionaler und praktischer Aspekte<br>
+• Entwicklung konkreter, umsetzbarer Lösungsschritte<br><br>
+<strong>Nächste Schritte:</strong> Vertiefen Sie die Reflexion mit gezielten Fragen und entwickeln Sie gemeinsam mit Ihrem Klienten praktikable Ansätze.<br><br>
+<em>Diese Demo-Antwort zeigt die Art der KI-Unterstützung. In der Live-Version würden hier noch detailliertere, personalisierte Analysen erscheinen.</em>`;
         }
 
         function adoptResponse() {
-            const response = document.getElementById('kiResponseText').textContent;
+            const response = document.getElementById('kiResponseText').innerHTML;
+            const coachInstructions = generateCoachInstructions(currentEditingStep, selectedClient);
+            
+            // KI-Response für Klient im Chat
             addChatMessage('ai', response);
+            
+            // Coach-Anweisungen im separaten Fenster (unsichtbar für Klient)
+            const instructionsDiv = document.getElementById('coachInstructions');
+            if (instructionsDiv) {
+                instructionsDiv.innerHTML = coachInstructions;
+            }
+            
             closePromptModal();
             
             // Auto-proceed to next step after a delay
@@ -1389,11 +1187,40 @@ Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
             }, 1000);
         }
 
+        function generateCoachInstructions(step, client) {
+            const clientName = clients[client].name;
+            
+            const instructions = {
+                1: `<strong>Coach-Hinweise für Schritt 1:</strong><br>
+• Lassen Sie die KI-Response auf sich wirken<br>
+• Beobachten Sie die Reaktion von ${clientName}<br>
+• Falls emotional: Pausieren und nachfragen "Wie geht es Ihnen gerade?"<br>
+• Nächste Frage: "Was von dem, was die KI gesagt hat, trifft besonders zu?"<br>
+• Ziel: Vertrauen aufbauen, Problem konkretisieren`,
+                
+                2: `<strong>Coach-Hinweise für Schritt 2:</strong><br>
+• KI hat empathisch gespiegelt - nutzen Sie das<br>
+• Fragen Sie: "Welche Auswirkung spüren Sie am stärksten?"<br>
+• Achten Sie auf nonverbale Signale<br>
+• Validieren Sie Gefühle: "Das ist völlig verständlich"<br>
+• Vermeiden Sie vorschnelle Lösungsvorschläge`,
+                
+                3: `<strong>Coach-Hinweise für Schritt 3:</strong><br>
+• KI lädt zur Visionsentwicklung ein<br>
+• Lassen Sie ${clientName} aussprechen, träumen<br>
+• Fragen Sie: "Wenn Sie keine Grenzen hätten..."<br>
+• Notieren Sie sich Schlüsselworte für später<br>
+• Ziel: Motivation und Hoffnung stärken`
+            };
+            
+            return instructions[step] || `<strong>Coach-Hinweise:</strong><br>Begleiten Sie ${clientName} einfühlsam durch diesen Schritt. Hören Sie aktiv zu und spiegeln Sie das Gehörte.`;
+        }
+
         function editResponse() {
             // Allow editing of the response
             const responseDiv = document.getElementById('kiResponseText');
-            const currentText = responseDiv.textContent;
-            responseDiv.innerHTML = `<textarea style="width:100%; height:200px; padding:15px; border: 2px solid #667eea; border-radius:10px; font-family:inherit; line-height:1.6;">${currentText}</textarea>`;
+            const currentText = responseDiv.innerHTML;
+            responseDiv.innerHTML = `<textarea style="width:100%; height:200px; padding:15px; border: 2px solid #667eea; border-radius:10px; font-family:inherit; line-height:1.6;">${currentText.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '')}</textarea>`;
         }
 
         function retryPrompt() {
@@ -1402,6 +1229,8 @@ Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
 
         function addChatMessage(sender, message) {
             const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
@@ -1427,10 +1256,13 @@ Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
         }
 
         function showTypingIndicator() {
-            document.getElementById('typingIndicator').classList.add('show');
-            setTimeout(() => {
-                document.getElementById('typingIndicator').classList.remove('show');
-            }, 2000);
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
         }
 
         function getClientResponse(step) {
@@ -1444,4 +1276,103 @@ Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
                     2: "Meine Aufgaben sind Routine geworden. Ich mache sie mit links, aber dabei fühle ich mich leer und unterfordert. Gleichzeitig habe ich Angst, in meinem Alter nochmal von vorne anzufangen."
                 },
                 lisa: {
-                    1: "Die Balance zwischen Karriere und Familie wird immer schwieriger. Ich liebe meinen Beruf als Chirurgin, aber die Familie leidet darunter
+                    1: "Die Balance zwischen Karriere und Familie wird immer schwieriger. Ich liebe meinen Beruf als Chirurgin, aber die Familie leidet darunter und ich merke, wie ich selbst erschöpfter werde.",
+                    2: "60-70 Stunden Wochen sind normal für mich. Meine Kinder sehe ich oft nur abends kurz. Mein Mann ist verständnisvoll, aber ich merke die Belastung für alle."
+                },
+                werner: {
+                    1: "Der Ruhestand kommt näher und ich weiß nicht, ob ich mich darauf freuen oder davor fürchten soll. 40 Jahre war meine Arbeit meine Identität.",
+                    2: "Als Abteilungsleiter war ich immer derjenige, der Entscheidungen getroffen hat. Jetzt frage ich mich: Wer bin ich ohne meinen Job? Was mache ich mit all der freien Zeit?"
+                }
+            };
+            
+            return responses[selectedClient]?.[step] || "Das ist ein wichtiger Punkt. Darüber muss ich nachdenken.";
+        }
+
+        function skipStep() {
+            if (currentStep < 12) {
+                setCurrentStep(currentStep + 1);
+                addChatMessage('coach', `Gut, dann gehen wir zu Schritt ${currentStep} über.`);
+            }
+        }
+
+        function addCoachNote(technique) {
+            addChatMessage('coach', `[${technique}] Das ist ein wichtiger Punkt. Können Sie das nochmal genauer erklären?`);
+        }
+
+        function exportSession() {
+            const sessionData = {
+                client: selectedClient,
+                startTime: sessionStartTime,
+                currentStep: currentStep,
+                messages: Array.from(document.querySelectorAll('.message')).map(msg => ({
+                    sender: msg.className.replace('message ', ''),
+                    text: msg.querySelector('.text').textContent,
+                    timestamp: msg.querySelector('.timestamp').textContent
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coaching-session-${selectedClient}-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+        }
+
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api/coaching-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: 'test', step: 1, client: 'test' })
+                });
+                
+                if (response.ok) {
+                    updateAPIStatus('connected');
+                } else {
+                    updateAPIStatus('demo');
+                }
+            } catch (error) {
+                updateAPIStatus('demo');
+            }
+        }
+
+        function updateAPIStatus(status) {
+            const statusElement = document.getElementById('apiStatus');
+            if (!statusElement) return;
+            
+            statusElement.className = `api-status ${status}`;
+            
+            switch(status) {
+                case 'connected':
+                    statusElement.innerHTML = '🟢 OpenAI verbunden';
+                    break;
+                case 'demo':
+                    statusElement.innerHTML = '🟡 Demo-Modus';
+                    break;
+                case 'error':
+                    statusElement.innerHTML = '🔴 API-Fehler';
+                    break;
+            }
+        }
+
+        function updateTime() {
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = new Date().toLocaleTimeString('de-DE');
+            }
+                
+            if (sessionStartTime) {
+                const duration = Math.floor((new Date() - sessionStartTime) / 1000);
+                const minutes = Math.floor(duration / 60);
+                const seconds = duration % 60;
+                const durationElement = document.getElementById('sessionDuration');
+                if (durationElement) {
+                    durationElement.textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
