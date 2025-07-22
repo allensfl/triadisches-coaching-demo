@@ -868,34 +868,60 @@
         });
 
         function initializeApp() {
+            console.log('Initializing app...');
+            
             // Client Selection Event Listeners
             const clientCards = document.querySelectorAll('.client-card');
+            console.log('Found client cards:', clientCards.length);
+            
             clientCards.forEach(card => {
-                card.addEventListener('click', () => selectClient(card.dataset.client));
+                card.addEventListener('click', function() {
+                    console.log('Client card clicked:', card.dataset.client);
+                    selectClient(card.dataset.client);
+                });
             });
 
             // Start Button Event Listener  
-            document.getElementById('startButton').addEventListener('click', startSession);
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', startSession);
+                console.log('Start button listener added');
+            }
 
             // Generate Steps Navigation
             generateStepsNavigation();
+            console.log('App initialized');
         }
 
         function selectClient(clientId) {
+            console.log('Selecting client:', clientId);
+            
+            if (!clientId || !clients[clientId]) {
+                console.error('Invalid client ID:', clientId);
+                return;
+            }
+            
             // Remove previous selection
             document.querySelectorAll('.client-card').forEach(card => {
                 card.classList.remove('selected');
             });
 
             // Add selection to clicked card
-            document.querySelector(`[data-client="${clientId}"]`).classList.add('selected');
+            const selectedCard = document.querySelector(`[data-client="${clientId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                console.log('Client card selected:', clientId);
+            }
             
             selectedClient = clientId;
             
             // Activate start button
             const startButton = document.getElementById('startButton');
-            startButton.classList.add('active');
-            startButton.textContent = `🚀 Session mit ${clients[clientId].name} starten`;
+            if (startButton) {
+                startButton.classList.add('active');
+                startButton.textContent = `🚀 Session mit ${clients[clientId].name} starten`;
+                console.log('Start button activated');
+            }
         }
 
         function startSession() {
