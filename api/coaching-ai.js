@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
     // Starte Run mit deiner Assistant ID
     const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: process.env.ASSISTANT_ID  // Deine Assistant ID hier
+      assistant_id: process.env.ASSISTANT_ID || 'asst_qau7z8cAfCNEycKyAnlj69yl'
     });
 
     // Warte auf Completion
