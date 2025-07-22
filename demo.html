@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triadisches Coaching - KI-gestütztes Coaching-System</title>
-    <meta name="description" content="Professionelles KI-gestütztes Coaching-System mit triadischem Ansatz. Wissenschaftlich fundiert, lokal gespeichert, DSGVO-konform.">
+    <title>Demo - Triadisches Coaching System</title>
+    <meta name="description" content="Interaktive Demo des triadischen Coaching-Systems mit Testklientin Maria">
     
     <style>
         /* Apple-inspired Design System */
         :root {
             --apple-blue: #007dfb;
             --apple-blue-light: #4da7ff;
+            --apple-green: #30d158;
+            --apple-orange: #ff9500;
             --apple-gray-50: #f2f2f7;
             --apple-gray-100: #e5e5ea;
             --apple-gray-200: #d1d1d6;
@@ -18,10 +20,8 @@
             --apple-gray-900: #1d1d1f;
             --apple-white: #ffffff;
             --gradient-primary: linear-gradient(135deg, #007dfb 0%, #4da7ff 100%);
-            --gradient-secondary: linear-gradient(135deg, #f2f2f7 0%, #ffffff 100%);
             --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.08);
             --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
-            --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.16);
         }
 
         * {
@@ -30,31 +30,24 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-            font-size: 16px;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            background: var(--apple-gray-50);
             color: var(--apple-gray-900);
             line-height: 1.6;
+        }
+
+        /* Header */
+        .demo-header {
             background: var(--apple-white);
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
             padding: 1rem 0;
-            border-bottom: 1px solid var(--apple-gray-100);
+            border-bottom: 1px solid var(--apple-gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .nav-container {
+        .header-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
@@ -63,709 +56,529 @@
             align-items: center;
         }
 
-        .logo {
+        .demo-logo h1 {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--apple-blue);
         }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
+        .demo-badge {
+            background: var(--apple-green);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
         }
 
-        .nav-links a {
+        .back-link {
+            color: var(--apple-blue);
             text-decoration: none;
-            color: var(--apple-gray-900);
             font-weight: 500;
-            transition: color 0.3s ease;
         }
 
-        .nav-links a:hover {
+        /* Main Layout */
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Navigation */
+        .demo-nav {
+            background: var(--apple-white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-small);
+        }
+
+        .nav-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--apple-gray-900);
+        }
+
+        .step-nav {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .step-button {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--apple-gray-200);
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--apple-gray-600);
+            transition: all 0.3s ease;
+        }
+
+        .step-button:hover {
+            border-color: var(--apple-blue);
             color: var(--apple-blue);
         }
 
-        /* Hero Section */
-        .hero {
-            padding: 120px 0 80px;
-            background: var(--gradient-secondary);
-            text-align: center;
+        .step-button.active {
+            background: var(--apple-blue);
+            color: white;
+            border-color: var(--apple-blue);
+        }
+
+        /* Content */
+        .demo-content {
+            background: var(--apple-white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-small);
             overflow: hidden;
         }
 
-        .hero-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
+        .content-header {
             background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.1;
+            color: white;
+            padding: 2rem;
+            text-align: center;
         }
 
-        .hero-subtitle {
-            font-size: 1.5rem;
-            color: var(--apple-gray-600);
+        .content-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        .step-description {
+            background: var(--apple-gray-50);
+            padding: 1.5rem;
+            border-radius: 12px;
             margin-bottom: 2rem;
-            font-weight: 400;
         }
 
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--apple-gray-600);
-            margin-bottom: 3rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+        .step-description h3 {
+            color: var(--apple-blue);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
         }
 
-        .cta-buttons {
+        .client-response {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 2px solid var(--apple-gray-200);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .client-label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ai-response {
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
+            border: 2px solid var(--apple-blue);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .ai-label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--apple-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .action-buttons {
             display: flex;
             gap: 1rem;
-            justify-content: center;
+            margin-top: 2rem;
             flex-wrap: wrap;
         }
 
         .btn {
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
         .btn-primary {
             background: var(--gradient-primary);
             color: white;
-            box-shadow: var(--shadow-medium);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-large);
+            box-shadow: var(--shadow-medium);
         }
 
         .btn-secondary {
-            background: var(--apple-white);
-            color: var(--apple-blue);
-            border: 2px solid var(--apple-blue);
+            background: var(--apple-gray-100);
+            color: var(--apple-gray-900);
         }
 
         .btn-secondary:hover {
-            background: var(--apple-blue);
-            color: white;
-            transform: translateY(-2px);
+            background: var(--apple-gray-200);
         }
 
-        /* Section Styling */
-        .section {
-            padding: 80px 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .section-header {
+        .progress-info {
             text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--apple-gray-900);
-        }
-
-        .section-subtitle {
-            font-size: 1.2rem;
             color: var(--apple-gray-600);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Problem Section */
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .problem-card {
-            background: var(--apple-white);
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-small);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .problem-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .problem-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .problem-card h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--apple-gray-900);
-        }
-
-        .problem-card p {
-            color: var(--apple-gray-600);
-            line-height: 1.6;
-        }
-
-        /* Solution Section */
-        .solution {
-            background: var(--apple-gray-50);
-        }
-
-        .solution-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .solution-content h3 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--apple-blue);
-        }
-
-        .solution-features {
-            list-style: none;
-            margin-top: 2rem;
-        }
-
-        .solution-features li {
-            padding: 0.5rem 0;
-            position: relative;
-            padding-left: 2rem;
-            color: var(--apple-gray-600);
-        }
-
-        .solution-features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--apple-blue);
-            font-weight: bold;
-        }
-
-        .solution-visual {
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow-medium);
-            text-align: center;
-        }
-
-        .triad-diagram {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin: 2rem 0;
-        }
-
-        .triad-element {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 50%;
-            font-weight: 600;
-            min-width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
             font-size: 0.9rem;
+            margin-top: 1rem;
         }
 
-        /* Science Section */
-        .science-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .science-text {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: var(--apple-gray-600);
-        }
-
-        .citation {
-            background: var(--apple-white);
-            padding: 2rem;
-            border-radius: 16px;
-            border-left: 4px solid var(--apple-blue);
-            box-shadow: var(--shadow-small);
-        }
-
-        .citation-title {
-            font-weight: 600;
-            color: var(--apple-gray-900);
-            margin-bottom: 0.5rem;
-        }
-
-        .citation-journal {
-            color: var(--apple-blue);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .citation-link {
-            display: inline-block;
-            color: var(--apple-blue);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .citation-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Pricing Section */
-        .pricing {
-            background: var(--apple-gray-50);
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .pricing-card {
-            background: var(--apple-white);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            text-align: center;
-            position: relative;
-            box-shadow: var(--shadow-small);
-            transition: all 0.3s ease;
-        }
-
-        .pricing-card.featured {
-            border: 2px solid var(--apple-blue);
-            transform: scale(1.05);
-        }
-
-        .pricing-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-large);
-        }
-
-        .pricing-card.featured:hover {
-            transform: translateY(-8px) scale(1.05);
-        }
-
-        .pricing-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--gradient-primary);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .pricing-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--apple-gray-900);
-        }
-
-        .pricing-price {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--apple-blue);
-            margin-bottom: 0.5rem;
-        }
-
-        .pricing-period {
-            color: var(--apple-gray-600);
-            margin-bottom: 2rem;
-        }
-
-        .pricing-features {
-            list-style: none;
-            text-align: left;
-            margin-bottom: 2rem;
-        }
-
-        .pricing-features li {
-            padding: 0.5rem 0;
-            position: relative;
-            padding-left: 2rem;
-            color: var(--apple-gray-600);
-        }
-
-        .pricing-features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: var(--apple-blue);
-            font-weight: bold;
-        }
-
-        /* Animation Classes */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
+            .demo-container {
+                padding: 1rem;
             }
             
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .cta-buttons {
+            .step-nav {
                 flex-direction: column;
-                align-items: center;
             }
             
-            .solution-grid,
-            .science-content {
-                grid-template-columns: 1fr;
+            .step-button {
+                text-align: center;
             }
             
-            .pricing-card.featured {
-                transform: none;
-            }
-            
-            .pricing-card.featured:hover {
-                transform: translateY(-8px);
-            }
-            
-            .triad-diagram {
+            .action-buttons {
                 flex-direction: column;
-                gap: 1rem;
             }
+            
+            .client-label, .ai-label {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Hidden class for step content */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="logo">Triadisches Coaching</div>
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#problem">Problem</a>
-                <a href="#solution">Lösung</a>
-                <a href="#science">Wissenschaft</a>
-                <a href="#pricing">Preise</a>
+    <!-- Header -->
+    <header class="demo-header">
+        <div class="header-container">
+            <div class="demo-logo">
+                <h1>Triadisches Coaching <span class="demo-badge">DEMO</span></h1>
             </div>
+            <a href="index.html" class="back-link">← Zurück zur Hauptseite</a>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-container">
-            <h1>Triadisches KI-Coaching</h1>
-            <p class="hero-subtitle">Klient + Coach + KI = Breakthrough-Ergebnisse</p>
-            <p class="hero-description">
-                Das weltweit erste 3-Akteure-Coaching-System: Ihr Coach moderiert, die KI analysiert systematisch, 
-                und Sie erleben Durchbrüche in 12 strukturierten Schritten. Wissenschaftlich fundiert, lokal gespeichert.
-            </p>
-            <div class="cta-buttons">
-                <a href="demo.html" class="btn btn-primary">Gratis Demo testen</a>
-                <a href="#pricing" class="btn btn-secondary">Desktop-App ansehen</a>
+    <!-- Main Container -->
+    <div class="demo-container">
+        <!-- Navigation -->
+        <nav class="demo-nav">
+            <h3 class="nav-title">Demo-Schritte</h3>
+            <div class="step-nav">
+                <button class="step-button active" onclick="showStep(1)">Schritt 1: Problem-/Zielbeschreibung</button>
+                <button class="step-button" onclick="showStep(3)">Schritt 3: Bildarbeit</button>
+                <button class="step-button" onclick="showStep(5)">Schritt 5: Schlüsselsituation</button>
+                <button class="step-button" onclick="showStep(7)">Schritt 7: KI-Analyse</button>
             </div>
-        </div>
-    </section>
+            <div class="progress-info" id="progress-info">
+                Schritt 1 von 4 - Klient + Coach + KI arbeiten zusammen
+            </div>
+        </nav>
 
-    <!-- Problem Section -->
-    <section id="problem" class="section">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2 class="section-title">Warum traditionelles Coaching an Grenzen stößt</h2>
-                <p class="section-subtitle">
-                    Coaches und Klienten brauchen mehr als nur Gespräche - sie brauchen systematische Durchbrüche
-                </p>
-            </div>
-            <div class="problem-grid">
-                <div class="problem-card fade-in">
-                    <div class="problem-icon">🔄</div>
-                    <h3>Oberflächliche Gespräche</h3>
-                    <p>Traditionelle Coaching-Sessions kratzen oft nur an der Oberfläche. Ohne systematische Analyse bleiben tieferliegende Muster und Blockaden unentdeckt.</p>
+        <!-- Main Content -->
+        <main class="demo-content">
+            <!-- Step 1 -->
+            <div id="step-1" class="step-content active">
+                <div class="content-header">
+                    <h2>Schritt 1: Problem- und Zielbeschreibung</h2>
+                    <p>Coach sammelt Info, KI gibt strukturierte Rückmeldung</p>
                 </div>
-                <div class="problem-card fade-in">
-                    <div class="problem-icon">📊</div>
-                    <h3>Subjektive Interpretation</h3>
-                    <p>Coaches sind Menschen und haben blinde Flecken. Wichtige Zusammenhänge werden übersehen, weil die Analyse rein subjektiv und unsystematisch erfolgt.</p>
-                </div>
-                <div class="problem-card fade-in">
-                    <div class="problem-icon">⏰</div>
-                    <h3>Langsame Fortschritte</h3>
-                    <p>Ohne strukturierte Methodik dauern Coaching-Prozesse oft Monate oder Jahre. Klienten verlieren die Geduld, Coaches die Richtung.</p>
-                </div>
-                <div class="problem-card fade-in">
-                    <div class="problem-icon">💭</div>
-                    <h3>Fehlende Objektivität</h3>
-                    <p>Coaches können nicht aus ihrer eigenen Perspektive heraustreten. Wichtige alternative Sichtweisen und Lösungsansätze bleiben unentdeckt.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Solution Section -->
-    <section id="solution" class="section solution">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2 class="section-title">Das 3-Akteure-System</h2>
-                <p class="section-subtitle">
-                    Klient, Coach und KI arbeiten systematisch zusammen für messbare Durchbrüche
-                </p>
-            </div>
-            <div class="solution-grid">
-                <div class="solution-content fade-in">
-                    <h3>Collaborative Intelligence Coaching</h3>
-                    <p>
-                        Unser revolutionäres System kombiniert menschliche Intuition mit KI-Power: Der Coach moderiert und führt, 
-                        die KI analysiert systematisch alle Aspekte, und der Klient erlebt strukturierte Durchbrüche in 12 erprobten Schritten.
-                    </p>
-                    <ul class="solution-features">
-                        <li>12 systematische Coaching-Schritte</li>
-                        <li>83+ spezialisierte KI-Prompts</li>
-                        <li>Avatar-Aufstellungen und Bildarbeit</li>
-                        <li>Tiefenpsychologische KI-Analyse</li>
-                        <li>Vollständig lokale Datenspeicherung</li>
-                        <li>DSGVO-konforme Lösung</li>
-                    </ul>
-                </div>
-                <div class="solution-visual fade-in">
-                    <h4 style="margin-bottom: 2rem; color: var(--apple-gray-900);">Das triadische System</h4>
-                    <div class="triad-diagram">
-                        <div class="triad-element">KLIENT<br><small>Problem & Ziel</small></div>
-                        <div class="triad-element">COACH<br><small>Moderation</small></div>
-                        <div class="triad-element">KI<br><small>Analyse</small></div>
+                
+                <div class="content-body">
+                    <div class="step-description">
+                        <h3>Was passiert in diesem Schritt?</h3>
+                        <p>In diesem ersten Schritt schildert der Klient sein Problem. Der Coach protokolliert, stellt klärende Fragen und füttert die KI mit einem strukturierten Prompt. Die KI paraphrasiert das Problem, normalisiert es und hebt bereits erste Stärken des Klienten hervor - für Vertrauen und Motivation.</p>
                     </div>
-                    <p style="color: var(--apple-gray-600); font-size: 0.9rem;">
-                        Die drei Akteure arbeiten systematisch zusammen für optimale Ergebnisse
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Science Section -->
-    <section id="science" class="section">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2 class="section-title">Wissenschaftlich fundiert</h2>
-                <p class="section-subtitle">
-                    Basierend auf aktueller Forschung und bewährten systemischen Ansätzen
-                </p>
-            </div>
-            <div class="science-content">
-                <div class="science-text fade-in">
-                    <p>
-                        Unser triadisches Coaching-System basiert auf den neuesten Erkenntnissen der systemischen 
-                        Therapie und KI-gestützten Analyse-Methoden. Die Kombination aus menschlicher Coaching-Expertise 
-                        und strukturierter KI-Analyse ermöglicht es, komplexe psychologische Muster zu erkennen und 
-                        nachhaltige Veränderungen zu bewirken.
-                    </p>
-                    <p style="margin-top: 1.5rem;">
-                        Die Integration von Avatar-Aufstellungen, Bildarbeit und tiefenpsychologischen KI-Interviews 
-                        stellt einen innovativen Ansatz dar, der die Wirksamkeit traditioneller Coaching-Methoden mit den 
-                        analytischen Möglichkeiten künstlicher Intelligenz verbindet.
-                    </p>
-                </div>
-                <div class="citation fade-in">
-                    <div class="citation-title">
-                        Systemisches Coaching: Grundlagen und Anwendungen
+                    <div class="client-response">
+                        <div class="client-label">
+                            <div class="client-avatar">M</div>
+                            <div>
+                                <div style="font-weight: 600;">Maria (Testklientin)</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-gray-600);">Führungskraft, 42 Jahre</div>
+                            </div>
+                        </div>
+                        <div>
+                            "Ich fühle mich in letzter Zeit völlig überfordert. Mein Team scheint nicht mehr zu mir zu finden, die Projekte laufen nicht wie geplant, und zu Hause merke ich, dass ich immer gereizt bin. Ich weiß nicht mehr, wo ich anfangen soll..."
+                        </div>
                     </div>
-                    <div class="citation-journal">
-                        Springer-Verlag, Psychotherapie Forum
+
+                    <div class="ai-response">
+                        <div class="ai-label">
+                            <div class="ai-icon">🤖</div>
+                            <div>
+                                <div style="font-weight: 600;">KI-Analyse (Triadisches System)</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-blue);">Systematische Coaching-Rückmeldung</div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>🤖 KI-Analyse:</strong> Vielen Dank für Ihr Vertrauen. Was Sie schildern, ist eine häufige Herausforderung für Führungskräfte.<br><br>
+                            <strong>Ihr Problem:</strong> Überforderungssituation mit Auswirkungen auf verschiedene Lebensbereiche.<br><br>
+                            <strong>Ihre Stärken:</strong> Sie reflektieren bewusst und suchen aktiv nach Lösungen.<br><br>
+                            <em>→ Das sind wertvolle Ressourcen für den Coaching-Prozess</em>
+                        </div>
                     </div>
-                    <p style="font-size: 0.9rem; color: var(--apple-gray-600); margin-bottom: 1rem;">
-                        Eine umfassende Darstellung systemischer Coaching-Ansätze und deren Wirksamkeit 
-                        in der praktischen Anwendung.
-                    </p>
-                    <a href="https://link.springer.com/article/10.1007/s00278-021-00512-1" 
-                       class="citation-link" target="_blank" rel="noopener">
-                        Vollständige Publikation ansehen →
-                    </a>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showStep(3)">Nächster Schritt</button>
+                        <button class="btn btn-secondary" onclick="simulateKI(1)">KI-Analyse wiederholen</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="section pricing">
-        <div class="container">
-            <div class="section-header fade-in">
-                <h2 class="section-title">Transparent & Fair</h2>
-                <p class="section-subtitle">
-                    Wählen Sie das Paket, das zu Ihren Bedürfnissen passt
-                </p>
-            </div>
-            <div class="pricing-grid">
-                <div class="pricing-card fade-in">
-                    <h3 class="pricing-title">Demo</h3>
-                    <div class="pricing-price">Gratis</div>
-                    <div class="pricing-period">Für immer kostenlos</div>
-                    <ul class="pricing-features">
-                        <li>4 Coaching-Schritte</li>
-                        <li>Basis-Prompts</li>
-                        <li>Keine Datenspeicherung</li>
-                        <li>Testklient "Maria"</li>
-                        <li>Vollständig funktionsfähig</li>
-                    </ul>
-                    <a href="demo.html" class="btn btn-secondary" style="width: 100%;">Demo starten</a>
+            <!-- Step 3 -->
+            <div id="step-3" class="step-content">
+                <div class="content-header">
+                    <h2>Schritt 3: Immersive Bildarbeit zur Zielklärung</h2>
+                    <p>Klient wählt Bild, Coach moderiert, KI analysiert Metaphern</p>
                 </div>
+                
+                <div class="content-body">
+                    <div class="step-description">
+                        <h3>Was passiert in diesem Schritt?</h3>
+                        <p>Der Klient wählt intuitiv ein Bild, das sein Ziel symbolisiert. Der Coach führt durch die Bildbeschreibung, die KI analysiert anschließend die Beziehung zwischen Bildmetaphern und Coaching-Zielen. Dies macht unbewusste Aspekte des Ziels bewusst und verstärkt die Motivation.</p>
+                    </div>
 
-                <div class="pricing-card featured fade-in">
-                    <div class="pricing-badge">Empfohlen</div>
-                    <h3 class="pricing-title">Desktop-App</h3>
-                    <div class="pricing-price">997€</div>
-                    <div class="pricing-period">Einmalige Zahlung</div>
-                    <ul class="pricing-features">
-                        <li>Alle 12 Coaching-Schritte</li>
-                        <li>83+ spezialisierte Prompts</li>
-                        <li>Lokale Datenspeicherung</li>
-                        <li>DSGVO-konform</li>
-                        <li>Eigene KI-Keys</li>
-                        <li>Unbegrenzte Klienten</li>
-                        <li>Updates für 1 Jahr</li>
-                    </ul>
-                    <a href="mailto:kontakt@triadisches-coaching.de?subject=Desktop-App Interesse" 
-                       class="btn btn-primary" style="width: 100%;">Jetzt bestellen</a>
-                </div>
+                    <div class="client-response">
+                        <div class="client-label">
+                            <div class="client-avatar">M</div>
+                            <div>
+                                <div style="font-weight: 600;">Maria (Testklientin)</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-gray-600);">Bildbeschreibung</div>
+                            </div>
+                        </div>
+                        <div>
+                            "Ich habe das Bild mit der Person auf dem Berggipfel gewählt. Sie steht dort allein, aber nicht einsam - selbstbewusst und ruhig. Die Sonne scheint warm, der Ausblick ist weit. Sie weiß genau, wo sie steht und wohin sie als nächstes will. Das ist genau das Gefühl, das ich mir wünsche."
+                        </div>
+                    </div>
 
-                <div class="pricing-card fade-in">
-                    <h3 class="pricing-title">Enterprise</h3>
-                    <div class="pricing-price">Auf Anfrage</div>
-                    <div class="pricing-period">Individuelle Lösung</div>
-                    <ul class="pricing-features">
-                        <li>Multi-User-Lizenzen</li>
-                        <li>White-Label-Option</li>
-                        <li>Custom-Branding</li>
-                        <li>Schulungen & Support</li>
-                        <li>API-Integration</li>
-                        <li>Dedizierter Account-Manager</li>
-                    </ul>
-                    <a href="mailto:enterprise@triadisches-coaching.de?subject=Enterprise Anfrage" 
-                       class="btn btn-secondary" style="width: 100%;">Kontakt aufnehmen</a>
+                    <div class="ai-response">
+                        <div class="ai-label">
+                            <div class="ai-icon">🎨</div>
+                            <div>
+                                <div style="font-weight: 600;">KI-Bildanalyse</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-blue);">Metapher-Interpretation</div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>🎨 KI-Bildanalyse:</strong><br><br>
+                            <strong>Die warme Sonne</strong> symbolisiert das positive Gefühl und die Zuversicht, die Sie anstreben<br><br>
+                            <strong>Der weite Ausblick</strong> steht für Klarheit und neue Perspektiven in Ihrer Führungsrolle<br><br>
+                            <strong>Das sichere Stehen</strong> repräsentiert Selbstvertrauen und innere Stabilität<br><br>
+                            <strong>Das Wissen um den Weg</strong> zeigt Ihren Wunsch nach klarer Orientierung<br><br>
+                            <em>→ Ihre Bildwahl zeigt: Sie suchen nicht Dominanz, sondern souveräne Ruhe</em>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showStep(5)">Nächster Schritt</button>
+                        <button class="btn btn-secondary" onclick="simulateKI(3)">KI-Analyse wiederholen</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer style="background: var(--apple-gray-900); color: var(--apple-white); padding: 3rem 0; text-align: center;">
-        <div class="container">
-            <div class="logo" style="color: var(--apple-blue); margin-bottom: 2rem;">Triadisches Coaching</div>
-            <p style="color: var(--apple-gray-200); margin-bottom: 2rem;">
-                Revolutionäres KI-gestütztes Coaching mit wissenschaftlich fundiertem triadischen Ansatz
-            </p>
-            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
-                <a href="mailto:kontakt@triadisches-coaching.de" style="color: var(--apple-gray-200); text-decoration: none;">
-                    Kontakt
-                </a>
-                <a href="#" style="color: var(--apple-gray-200); text-decoration: none;">
-                    Impressum
-                </a>
-                <a href="#" style="color: var(--apple-gray-200); text-decoration: none;">
-                    Datenschutz
-                </a>
+            <!-- Step 5 -->
+            <div id="step-5" class="step-content">
+                <div class="content-header">
+                    <h2>Schritt 5: Schlüsselsituation und Schlüsselaffekt</h2>
+                    <p>Coach identifiziert mit Klient die Kernsituation, KI strukturiert</p>
+                </div>
+                
+                <div class="content-body">
+                    <div class="step-description">
+                        <h3>Was passiert in diesem Schritt?</h3>
+                        <p>Coach und Klient identifizieren die typische Situation, in der das Problem am stärksten auftritt, sowie den spontanen Gefühlszustand (Schlüsselaffekt) in diesem Moment. Die KI hilft dabei, Muster zu erkennen und den 'Auge des Taifuns' zu umreißen.</p>
+                    </div>
+
+                    <div class="client-response">
+                        <div class="client-label">
+                            <div class="client-avatar">M</div>
+                            <div>
+                                <div style="font-weight: 600;">Maria (Testklientin)</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-gray-600);">Schlüsselsituation-Beschreibung</div>
+                            </div>
+                        </div>
+                        <div>
+                            "Es passiert meistens, wenn ich vor wichtigen Entscheidungen stehe und eigentlich handeln müsste. Dann fühle ich mich wie gelähmt. Alles andere scheint plötzlich dringender. Ich rede mir ein, ich müsse erst noch mehr recherchieren, besser vorbereitet sein - und schiebe die wichtige Sache vor mir her."
+                        </div>
+                    </div>
+
+                    <div class="ai-response">
+                        <div class="ai-label">
+                            <div class="ai-icon">🔍</div>
+                            <div>
+                                <div style="font-weight: 600;">KI-Musteranalyse</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-blue);">Schlüsselsituation erkannt</div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>🔍 Schlüsselsituation identifiziert:</strong><br><br>
+                            <strong>Auslöser:</strong> Wichtige Entscheidungsmomente mit Tragweite<br><br>
+                            <strong>Schlüsselaffekt:</strong> Lähmungsgefühl + Vermeidungsverhalten<br><br>
+                            <strong>Muster:</strong> Perfektionismus als Prokrastinations-Strategie<br><br>
+                            <strong>Funktion:</strong> Schutz vor möglichen Fehlern und Kritik<br><br>
+                            <em>→ Ihr System versucht Sie zu schützen, blockiert aber gleichzeitig Ihren Fortschritt</em>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showStep(7)">Nächster Schritt</button>
+                        <button class="btn btn-secondary" onclick="simulateKI(5)">KI-Analyse wiederholen</button>
+                    </div>
+                </div>
             </div>
-            <p style="color: var(--apple-gray-600); font-size: 0.9rem;">
-                © 2025 Triadisches Coaching. Alle Rechte vorbehalten.
-            </p>
-        </div>
-    </footer>
+
+            <!-- Step 7 -->
+            <div id="step-7" class="step-content">
+                <div class="content-header">
+                    <h2>Schritt 7: KI-Analyse der Persönlichkeitsanteile</h2>
+                    <p>KI analysiert innere Widerstände und Ursachenzusammenhänge</p>
+                </div>
+                
+                <div class="content-body">
+                    <div class="step-description">
+                        <h3>Was passiert in diesem Schritt?</h3>
+                        <p>Die KI wertet das Avatar-Interview systematisch aus und identifiziert die tieferen Ursachen. Sie agiert als 'innere Bremse', benennt Ausbalancierungsprobleme und erklärt das Ursachengefüge - für ein klares Verständnis der Problemdynamik.</p>
+                    </div>
+
+                    <div class="client-response">
+                        <div class="client-label">
+                            <div class="client-avatar">M</div>
+                            <div>
+                                <div style="font-weight: 600;">Maria (Testklientin)</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-gray-600);">Nach Avatar-Interview</div>
+                            </div>
+                        </div>
+                        <div>
+                            "Nach dem Avatar-Interview mit meiner 'inneren Bremse' wird mir klar: Ein Teil von mir hat panische Angst vor Fehlern. Er denkt, dass jeder Fehler eine Katastrophe ist und ich dann das Vertrauen aller verliere. Deshalb lieber gar nichts riskieren..."
+                        </div>
+                    </div>
+
+                    <div class="ai-response">
+                        <div class="ai-label">
+                            <div class="ai-icon">⚖️</div>
+                            <div>
+                                <div style="font-weight: 600;">KI-Tiefenanalyse</div>
+                                <div style="font-size: 0.8rem; color: var(--apple-blue);">Ursachenzusammenhänge</div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>⚖️ Ausbalancierungs-Analyse:</strong><br><br>
+                            <strong>Kern-Dimension:</strong> Minderwertigkeitsgefühl vs. Selbstwert<br>
+                            <strong>Sekundär:</strong> Perfektionsanspruch vs. Akzeptanz von Fehlern<br>
+                            <strong>Tertiär:</strong> Sicherheitsbedürfnis vs. Risikobereitschaft<br><br>
+                            <strong>Ursachenkette:</strong> Geringer Selbstwert → Angst vor Bewertung → Perfektionsdruck → Vermeidung → Bestätigung der Selbstzweifel<br><br>
+                            <em>→ Der Teufelskreis stabilisiert sich selbst und muss an der Wurzel durchbrochen werden</em>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="completDemo()">Demo abgeschlossen!</button>
+                        <button class="btn btn-secondary" onclick="simulateKI(7)">KI-Analyse wiederholen</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+        // Simple JavaScript without eval or complex operations
+        function showStep(stepNumber) {
+            // Hide all steps
+            const steps = [1, 3, 5, 7];
+            steps.forEach(num => {
+                const element = document.getElementById('step-' + num);
+                if (element) {
+                    element.classList.remove('active');
                 }
             });
-        });
-
-        // Intersection Observer for fade-in animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all elements with fade-in class
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Navigation background opacity on scroll
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 50) {
-                nav.style.background = 'rgba(255, 255, 255, 0.95)';
-            } else {
-                nav.style.background = 'rgba(255, 255, 255, 0.9)';
+            
+            // Show selected step
+            const targetStep = document.getElementById('step-' + stepNumber);
+            if (targetStep) {
+                targetStep.classList.add('active');
             }
-        });
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.step-button');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Find and activate the right button
+            buttons.forEach(btn => {
+                if (btn.textContent.includes('Schritt ' + stepNumber)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update progress
+            const stepIndex = steps.indexOf(stepNumber) + 1;
+            const progressElement = document.getElementById('progress-info');
+            if (progressElement) {
+                progressElement.textContent = `Schritt ${stepIndex} von 4 - Klient + Coach + KI arbeiten zusammen`;
+            }
+        }
+        
+        function simulateKI(step) {
+            alert('🤖 In der Vollversion würde hier eine echte KI-Analyse mit Ihrem OpenAI-Key stattfinden!\n\nDie Demo zeigt Beispiel-Antworten von Testklientin Maria.');
+        }
+        
+        function completDemo() {
+            alert('🎉 Demo abgeschlossen!\n\nSie haben alle 4 Schritte des triadischen Coaching-Systems kennengelernt.\n\nMöchten Sie die vollständige Desktop-App mit allen 12 Schritten und 83+ Prompts erwerben?');
+        }
     </script>
 </body>
 </html>
