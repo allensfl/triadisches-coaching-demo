@@ -1,15 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "pages/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "pages/index.html",
-      "use": "@vercel/static"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
@@ -17,10 +12,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/pages/$1"
+      "dest": "/index.html"
     }
-  ],
-  "env": {
-    "OPENAI_API_KEY": "@openai_api_key"
-  }
+  ]
 }
