@@ -787,7 +787,12 @@
 
             <div class="form-group">
                 <label for="promptText">Prompt für KI-Assistent:</label>
-                <textarea id="promptText" rows="4" placeholder="Beschreiben Sie, was die KI analysieren soll...">Als erfahrener Coach-Assistent: Analysiere das Hauptproblem '[PROBLEMBESCHREIBUNG]' mit Kontext '[DETAILS]'. Entwickle präzise Fragen, um ein klares, messbares Coaching-Ziel zu formulieren. Berücksichtige emotionale und praktische Aspekte.</textarea>
+                <textarea id="promptText" rows="4" placeholder="Hier formulieren Sie Ihre Frage an die KI oder wählen einen bestehenden Prompt aus Ihrer Bibliothek...
+
+Beispiele:
+• Analysiere das Problem '[PROBLEMBESCHREIBUNG]' und entwickle präzise Fragen
+• Hilf mir, die Ressourcen des Klienten zu identifizieren basierend auf '[DETAILS]'
+• Was sind mögliche nächste Schritte für die Situation '[KONTEXT]'?"></textarea>
             </div>
 
             <div class="variable-inputs">
@@ -1090,8 +1095,8 @@
                     <div class="message coach">
                         <strong>Coach:</strong> ${dialog.coach}
                     </div>
-                    <div class="message ai" style="margin-top: 15px;">
-                        <strong>KI-Impuls:</strong> ${dialog.context}
+                    <div class="message" style="background: rgba(102, 126, 234, 0.05); border: 1px dashed #667eea; color: #667eea; margin-top: 15px;">
+                        <strong>💡 Demo-Hinweis:</strong> In der echten Anwendung führen Sie hier ein mündliches Gespräch. Diese Dialoge sind nur zur Veranschaulichung.
                     </div>
                 `;
             }
@@ -1125,12 +1130,17 @@
         function openPromptEditor() {
             document.getElementById('promptModal').style.display = 'block';
             
-            // Beispiel-Daten setzen basierend auf Klient
-            const clientData = clients[selectedClient];
+            // Leere Felder - Coach formuliert frei
+            document.getElementById('promptText').value = '';
+            document.getElementById('problemDescription').value = '';
+            document.getElementById('details').value = '';
+            document.getElementById('context').value = '';
+            
+            // Nur für Demo: Beispiel-Daten für Lisa setzen (falls gewünscht)
             if (selectedClient === 'lisa') {
-                document.getElementById('problemDescription').value = "Die Balance zwischen Karriere als Chirurgin und Familie wird immer schwieriger";
-                document.getElementById('details').value = "60-70 Stunden Wochen, Kinder sehe ich nur abends kurz";
-                document.getElementById('context').value = "Liebe meinen Beruf, will ihn nicht aufgeben, aber Familie leidet";
+                document.getElementById('problemDescription').placeholder = "z.B.: Die Balance zwischen Karriere und Familie wird schwieriger";
+                document.getElementById('details').placeholder = "z.B.: 60-70 Stunden Wochen, sehe Kinder nur abends";
+                document.getElementById('context').placeholder = "z.B.: Liebe meinen Beruf, will Familie nicht vernachlässigen";
             }
         }
 
