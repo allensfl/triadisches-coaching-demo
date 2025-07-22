@@ -829,6 +829,57 @@
     </div>
 
     <script>
+        const stepDialogs = {
+            1: {
+                coach: "Was ist Ihr wichtigstes Ziel für die nächsten 6 Monate?",
+                context: "Zielklärung und Motivation erforschen"
+            },
+            2: {
+                coach: "Beschreiben Sie mir Ihre aktuelle Situation in drei Worten.",
+                context: "Emotionale Landkarte erstellen"
+            },
+            3: {
+                coach: "Stellen Sie sich vor, es ist ein Jahr später und alles ist perfekt gelaufen. Was sehen Sie?",
+                context: "Kraftvolle Zukunftsvision entwickeln"
+            },
+            4: {
+                coach: "Was hält Sie davon ab, diesen Traum zu verwirklichen?",
+                context: "Hindernisse bewusst machen und externalisieren"
+            },
+            5: {
+                coach: "Erzählen Sie mir von einem Moment, in dem Sie eine ähnliche Herausforderung gemeistert haben.",
+                context: "Ressourcen und Erfolgsgeschichten aktivieren"
+            },
+            6: {
+                coach: "Welche innere Stimme spricht am lautesten, wenn Sie an diese Veränderung denken?",
+                context: "Innere Anteile identifizieren und dialogisieren"
+            },
+            7: {
+                coach: "Wenn Geld und Zeit keine Rolle spielten - welche verrückte Idee hätten Sie?",
+                context: "Kreative Lösungsfindung ohne Grenzen"
+            },
+            8: {
+                coach: "Ihr Bauchgefühl sagt Ihnen... was genau?",
+                context: "Intuitive Entscheidungsfindung fördern"
+            },
+            9: {
+                coach: "Was ist der allererste, kleinste Schritt, den Sie diese Woche machen könnten?",
+                context: "Konkrete Handlungsschritte entwickeln"
+            },
+            10: {
+                coach: "Woran werden Sie merken, dass Sie auf dem richtigen Weg sind?",
+                context: "Erfolgsmetriken und Feedback-Schleifen definieren"
+            },
+            11: {
+                coach: "Was könnte schiefgehen? Und wie bereiten wir uns darauf vor?",
+                context: "Präventives Risikomanagement betreiben"
+            },
+            12: {
+                coach: "Was versprechen Sie sich selbst für die kommende Woche?",
+                context: "Verbindlichkeit und Commitment schaffen"
+            }
+        };
+
         let selectedClient = null;
         let currentStep = 1;
         let sessionStartTime = null;
@@ -880,7 +931,8 @@
             ],
             3: [
                 "Wunderfrage", "Zukunftsvision", "Visions-Board",
-                "Best-Case-Scenario", "Idealer Tag", "Wertekompass"
+                "Best-Case-Scenario", "Idealer Tag", "Wertekompass",
+                "🖼️ Immersive Bildarbeit", "🎨 Digitale Collage-Tools"
             ],
             4: [
                 "Hindernis-Analyse", "Glaubenssatz-Check", "Saboteur-Identifikation",
@@ -894,7 +946,7 @@
             6: [
                 "Innere Anteile", "Avatar-Interview", "Rollenwechsel",
                 "Zukunfts-Ich Dialog", "Innerer Kritiker", "Weiser Ratgeber",
-                "Systemische Anteile", "Familiäre Stimmen"
+                "Systemische Anteile", "Familiäre Stimmen", "🎭 3D Avatar-Tools"
             ],
             7: [
                 "Brainstorming", "Pro-Contra-Liste", "Optionen-Matrix",
@@ -1016,9 +1068,43 @@
             const tools = stepTools[stepNum] || ["Allgemeine Coaching-Techniken"];
             const toolsContainer = document.getElementById('currentTools');
             
-            toolsContainer.innerHTML = tools.map(tool => 
-                `<div class="tool-item">${tool}</div>`
-            ).join('');
+            toolsContainer.innerHTML = tools.map(tool => {
+                if (tool.includes('🖼️ Immersive Bildarbeit')) {
+                    return `<div class="tool-item" onclick="openImageLibrary()" style="cursor: pointer; background: linear-gradient(135deg, #e17055, #fab1a0);">${tool}</div>`;
+                } else if (tool.includes('🎭 3D Avatar-Tools')) {
+                    return `<div class="tool-item" onclick="open3DTools()" style="cursor: pointer; background: linear-gradient(135deg, #6c5ce7, #a29bfe);">${tool}</div>`;
+                } else {
+                    return `<div class="tool-item">${tool}</div>`;
+                }
+            }).join('');
+
+            // Dynamischen Dialog aktualisieren
+            updateStepDialog(stepNum);
+        }
+
+        function updateStepDialog(stepNum) {
+            const dialog = stepDialogs[stepNum];
+            if (dialog) {
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = `
+                    <div class="message coach">
+                        <strong>Coach:</strong> ${dialog.coach}
+                    </div>
+                    <div class="message ai" style="margin-top: 15px;">
+                        <strong>KI-Impuls:</strong> ${dialog.context}
+                    </div>
+                `;
+            }
+        }
+
+        function openImageLibrary() {
+            window.open('https://unsplash.com/s/photos/vision-future-success', '_blank');
+            alert('🖼️ Bildarbeit-Tool geöffnet!\n\nIn der echten Anwendung würde hier eine kuratierte Sammlung von Coaching-Bildern zur Zielvisualisierung öffnen.');
+        }
+
+        function open3DTools() {
+            window.open('https://www.vroid.com/studio', '_blank');
+            alert('🎭 3D Avatar-Tools geöffnet!\n\nIn der echten Anwendung würden hier spezialisierte 3D-Avatar-Tools für das "Innere Team" Interview öffnen.');
         }
 
         function updateProgress(stepNum) {
