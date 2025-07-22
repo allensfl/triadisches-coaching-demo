@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triadisches KI-Coaching - Live Demo</title>
-    <meta name="description" content="Erleben Sie die Zukunft des Coachings: Klient + Coach + KI in einer innovativen Demo-Umgebung">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
-    
+    <title>Triadisches Coaching Demo - Live mit OpenAI Integration</title>
     <style>
         * {
             margin: 0;
@@ -14,101 +11,597 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --apple-blue: #007dfb;
-            --apple-blue-light: #4da7ff;
-            --apple-gray-50: #f2f2f7;
-            --apple-gray-100: #e5e5ea;
-            --apple-gray-200: #d1d1d6;
-            --apple-gray-600: #8e8e93;
-            --apple-gray-900: #1d1d1f;
-            --apple-white: #ffffff;
-            --success-green: #28a745;
-            --warning-orange: #fd7e14;
-            --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f7;
-            color: var(--apple-gray-900);
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            color: #333;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem;
+            padding: 20px;
         }
 
-        /* Header */
-        header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            padding: 2rem;
+        .header {
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            color: white;
+            margin-bottom: 40px;
         }
 
-        .header-title {
-            font-size: 2.5rem;
+        .header h1 {
+            font-size: 3em;
             font-weight: 700;
-            margin-bottom: 1rem;
-            background: var(--purple-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
-        .header-subtitle {
-            font-size: 1.2rem;
-            color: var(--apple-gray-600);
-            margin-bottom: 2rem;
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 10px;
         }
 
-        .demo-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--success-green);
-            background: rgba(40, 167, 69, 0.1);
-            padding: 0.5rem 1rem;
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .api-status.connected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .api-status.demo {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .api-status.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .client-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .client-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success-green);
-            animation: pulse 2s infinite;
+        .client-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .client-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
         }
 
-        /* Loading States */
-        .loading {
-            display: inline-flex;
+        .client-card:hover::before {
+            opacity: 1;
+        }
+
+        .client-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
+        }
+
+        .client-card.selected::before {
+            opacity: 1;
+        }
+
+        .client-card h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .client-card .age {
+            color: #666;
+            font-size: 1em;
+            margin-bottom: 18px;
+            font-weight: 500;
+        }
+
+        .client-card .problem {
+            color: #333;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            font-size: 0.95em;
+        }
+
+        .client-card .goal {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1em;
+            padding: 10px 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .start-button {
+            display: block;
+            width: 350px;
+            margin: 0 auto;
+            padding: 18px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .start-button.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .start-button:hover.active {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 35px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--apple-blue);
         }
 
-        .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #e5e5ea;
-            border-top: 2px solid var(--apple-blue);
+        .dashboard-header h2 {
+            font-size: 1.6em;
+            font-weight: 600;
+        }
+
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            font-size: 0.9em;
+        }
+
+        .steps-navigation {
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            padding: 25px 35px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .step-button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 15px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .step-button:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .main-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            min-height: 650px;
+        }
+
+        .chat-panel, .ai-panel, .tools-panel {
+            border-right: 1px solid rgba(102, 126, 234, 0.1);
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .tools-panel {
+            border-right: none;
+        }
+
+        .panel-header {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f3f4f6;
+            font-size: 1.1em;
+        }
+
+        .chat-messages {
+            height: 450px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .message {
+            margin-bottom: 18px;
+            padding: 15px 20px;
+            border-radius: 18px;
+            max-width: 85%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message.coach {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.client {
+            background: white;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .message.ai {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+
+        .message .timestamp {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .current-step-info {
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .step-title {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .step-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .coach-tools {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tool-section {
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .tool-section h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .screen-share-alert {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .prompt-editor {
+            margin-bottom: 25px;
+        }
+
+        .prompt-editor label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .prompt-editor textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95em;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .prompt-editor textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .variables-section {
+            margin: 25px 0;
+        }
+
+        .variables-section h4 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .variable-input {
+            margin-bottom: 20px;
+        }
+
+        .variable-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .variable-input input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .variable-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .ki-response-section {
+            margin-top: 35px;
+            border-top: 3px solid #f3f4f6;
+            padding-top: 25px;
+            display: none;
+        }
+
+        .ki-response-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ki-response {
+            background: linear-gradient(135deg, #f8faff 0%, #e8f2ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+        }
+
+        .ki-response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .ki-response-text {
+            line-height: 1.7;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .response-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .loading-indicator.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
@@ -116,1485 +609,795 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Error States */
-        .error-message {
-            background: rgba(255, 59, 48, 0.1);
-            border: 1px solid #ff3b30;
-            color: #d70015;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .api-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 0.5rem 1rem;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            z-index: 4000;
-        }
-
-        .api-status.connected {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success-green);
-            border: 1px solid var(--success-green);
-        }
-
-        .api-status.fallback {
-            background: rgba(255, 193, 7, 0.1);
-            color: var(--warning-orange);
-            border: 1px solid var(--warning-orange);
-        }
-
-        /* Rest of your existing CSS stays the same... */
-        /* Client Selection */
-        .client-selection {
-            background: white;
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            margin: 2rem 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .selection-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            background: var(--purple-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .selection-subtitle {
-            font-size: 1.1rem;
-            color: var(--apple-gray-600);
-            text-align: center;
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .clients-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .client-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .client-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-            border-color: var(--apple-blue-light);
-        }
-
-        .client-card.selected {
-            border-color: var(--apple-blue);
-            background: linear-gradient(135deg, #fff 0%, #f8faff 100%);
-            transform: translateY(-4px);
-        }
-
-        .client-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        .client-name {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
-
-        .client-situation {
-            font-size: 1rem;
-            color: var(--apple-blue);
-            font-weight: 500;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .client-description {
-            font-size: 0.9rem;
-            color: var(--apple-gray-600);
-            text-align: left;
-            line-height: 1.5;
-        }
-
-        .start-coaching-btn {
-            background: var(--purple-gradient);
-            color: white;
-            border: none;
-            padding: 1.5rem 3rem;
-            border-radius: 16px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: block;
-            margin: 0 auto;
-            opacity: 0.5;
-            pointer-events: none;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        }
-
-        .start-coaching-btn.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .start-coaching-btn:hover.active {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Coach Dashboard */
-        .coach-dashboard {
+        .typing-indicator {
             display: none;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            margin-top: 2rem;
-        }
-
-        .dashboard-header {
-            background: var(--purple-gradient);
-            color: white;
-            padding: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .client-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .client-info-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: white;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .client-details h3 {
-            font-size: 1.4rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .client-details p {
-            opacity: 0.9;
-            font-size: 1rem;
-        }
-
-        .session-controls {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            padding: 0.75rem 1.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Steps Navigation */
-        .steps-section {
-            background: var(--apple-gray-50);
-            padding: 2rem;
-            border-bottom: 1px solid var(--apple-gray-200);
-        }
-
-        .steps-title {
+            color: #667eea;
+            font-style: italic;
+            padding: 15px;
             text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--apple-gray-900);
-        }
-
-        .steps-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .step-button {
-            background: white;
-            border: 2px solid var(--apple-gray-200);
-            border-radius: 12px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .step-button:hover {
-            border-color: var(--apple-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-        }
-
-        .step-button.current {
-            background: var(--apple-blue);
-            color: white;
-            border-color: var(--apple-blue);
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-        }
-
-        .step-button.done {
-            background: var(--success-green);
-            color: white;
-            border-color: var(--success-green);
-        }
-
-        .step-num {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .step-name {
-            font-size: 0.8rem;
-            font-weight: 500;
-            line-height: 1.2;
-        }
-
-        /* Main Working Area */
-        .working-area {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            min-height: 600px;
-        }
-
-        .work-panel {
-            padding: 2rem;
-            border-right: 1px solid var(--apple-gray-200);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .work-panel:last-child {
-            border-right: none;
-        }
-
-        .panel-header {
-            margin-bottom: 1.5rem;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--apple-gray-900);
-        }
-
-        /* Chat Panel */
-        .chat-panel {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-
-        .chat-area {
-            background: white;
-            border: 1px solid var(--apple-gray-200);
-            border-radius: 12px;
-            padding: 1.5rem;
-            height: 350px;
-            overflow-y: auto;
-            margin-bottom: 1rem;
-            flex: 1;
-        }
-
-        .chat-message {
-            background: var(--apple-gray-100);
-            padding: 1rem 1.5rem;
-            border-radius: 18px;
-            margin-bottom: 1rem;
-            position: relative;
-            max-width: 85%;
-        }
-
-        .chat-message.from-client {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-bottom-left-radius: 6px;
-        }
-
-        .chat-message.from-coach {
-            background: var(--apple-blue);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 6px;
-        }
-
-        .chat-message.from-ai {
-            background: var(--purple-gradient);
-            color: white;
-            margin: 1rem auto;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        .message-time {
-            font-size: 0.7rem;
-            opacity: 0.6;
-            margin-top: 0.5rem;
-        }
-
-        .chat-inputs {
-            display: flex;
-            gap: 0.75rem;
-            align-items: flex-end;
-        }
-
-        .chat-input-field {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--apple-gray-200);
-            border-radius: 20px;
-            font-size: 0.9rem;
-            outline: none;
-            resize: none;
-            min-height: 40px;
-            max-height: 100px;
-        }
-
-        .chat-input-field:focus {
-            border-color: var(--apple-blue);
-        }
-
-        .chat-send-btn {
-            background: var(--apple-blue);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .chat-send-btn:hover {
-            background: var(--apple-blue-light);
-            transform: scale(1.05);
-        }
-
-        /* AI Panel */
-        .ai-panel {
-            background: white;
-        }
-
-        .current-step-display {
-            background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-            border: 1px solid var(--apple-blue-light);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            flex: 1;
-        }
-
-        .step-info h4 {
-            color: var(--apple-blue);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .step-desc {
-            color: var(--apple-gray-600);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .coach-guide {
             background: rgba(102, 126, 234, 0.1);
-            border-left: 4px solid var(--apple-blue);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            border-radius: 10px;
+            margin-top: 10px;
         }
 
-        .coach-guide h5 {
-            color: var(--apple-blue);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+        .typing-indicator.show {
+            display: block;
         }
 
-        .coach-guide p {
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-
-        .prompt-area {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 4px solid var(--warning-orange);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .prompt-area h5 {
-            color: var(--warning-orange);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .prompt-display {
-            background: white;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.8rem;
-            border: 1px solid var(--apple-gray-200);
-            margin-bottom: 0.75rem;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: var(--apple-blue);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: var(--apple-blue-light);
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: var(--apple-gray-200);
-            color: var(--apple-gray-900);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: var(--apple-gray-600);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success-green);
-            color: white;
-        }
-
-        .btn-success:hover:not(:disabled) {
-            background: #20c997;
-        }
-
-        /* Tools Panel */
-        .tools-panel {
-            background: linear-gradient(135deg, #f1f3f4 0%, #e8eaf6 100%);
-        }
-
-        .tool-group {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--apple-gray-200);
-        }
-
-        .tool-group h4 {
-            color: var(--apple-gray-900);
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        .tool-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .tool-item {
-            background: var(--apple-gray-50);
-            border: 1px solid var(--apple-gray-200);
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .tool-item:hover {
-            background: var(--apple-blue);
-            color: white;
-            border-color: var(--apple-blue);
-        }
-
-        /* Prompt Editor Modal */
-        .prompt-editor-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-        }
-
-        .prompt-editor-window {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 800px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--apple-gray-200);
-        }
-
-        .editor-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--apple-gray-900);
-        }
-
-        .close-editor {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--apple-gray-600);
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .close-editor:hover {
-            background: var(--apple-gray-100);
-        }
-
-        .collaboration-notice {
-            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
-            border: 1px solid var(--success-green);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--apple-gray-700);
-        }
-
-        .collaboration-notice strong {
-            color: var(--success-green);
-        }
-
-        .prompt-work-section {
-            background: var(--apple-gray-50);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .work-section-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--apple-gray-700);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .prompt-textarea {
-            width: 100%;
-            min-height: 200px;
-            padding: 1rem;
-            border: 2px solid var(--apple-gray-200);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Monaco', 'Courier New', monospace;
-            line-height: 1.5;
-            resize: vertical;
-            outline: none;
-            background: white;
-        }
-
-        .prompt-textarea:focus {
-            border-color: var(--apple-blue);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-
-        .variables-section {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid var(--warning-orange);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .variables-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--warning-orange);
-            margin-bottom: 0.75rem;
-        }
-
-        .variable-row {
-            background: white;
-            border: 1px solid rgba(253, 126, 20, 0.3);
-            border-radius: 6px;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .variable-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .variable-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--warning-orange);
-            margin-bottom: 0.25rem;
-        }
-
-        .variable-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--apple-gray-200);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .variable-input:focus {
-            border-color: var(--apple-blue);
-        }
-
-        .editor-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        .btn-large {
-            padding: 1rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 12px;
-        }
-
-        .screen-share-alert {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff4757, #ff6b7d);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 3000;
-            display: none;
-            animation: pulseAlert 2s infinite;
-        }
-
-        @keyframes pulseAlert {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 1200px) {
-            .working-area {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            
-            .work-panel {
-                border-right: none;
-                border-bottom: 1px solid var(--apple-gray-200);
-            }
-            
-            .work-panel:last-child {
-                border-bottom: none;
-            }
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .clients-grid {
+            .main-interface {
                 grid-template-columns: 1fr;
-            }
-            
-            .steps-container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-            }
-            
-            .step-button {
-                min-height: 80px;
-                padding: 0.75rem;
-            }
-            
-            .step-name {
-                font-size: 0.7rem;
+                height: auto;
             }
 
-            .dashboard-header {
-                flex-direction: column;
-                text-align: center;
+            .chat-panel, .ai-panel, .tools-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+                padding: 20px;
+            }
+
+            .steps-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .start-button {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- API Status Indicator -->
-    <div class="api-status" id="apiStatus">
-        <span class="loading-spinner"></span> Verbinde...
-    </div>
+    <div id="apiStatus" class="api-status demo">🔄 KI wird getestet...</div>
 
     <div class="container">
-        <header>
-            <h1 class="header-title">Triadisches KI-Coaching</h1>
-            <p class="header-subtitle">Erleben Sie die Zukunft des Coachings: Klient + Coach + KI</p>
-            <div class="demo-status">
-                <div class="status-dot"></div>
-                Live Demo mit OpenAI Integration
-            </div>
-        </header>
-
         <!-- Client Selection Screen -->
-        <div class="client-selection" id="clientSelection">
-            <h2 class="selection-title">Wählen Sie Ihren Demo-Klienten</h2>
-            <p class="selection-subtitle">
-                Erleben Sie eine komplette Coaching-Session aus Coach-Perspektive mit authentischen Klienten-Profilen und echter KI-Integration
-            </p>
+        <div id="clientSelection" class="client-selection-screen">
+            <div class="header">
+                <h1>🚀 Triadisches Coaching Demo</h1>
+                <p>Erleben Sie die Zukunft des Coachings: Coach + Klient + KI</p>
+                <p style="font-size: 1em; opacity: 0.8;">Wählen Sie einen Klienten und erleben Sie das revolutionäre 3-Akteure-System live!</p>
+            </div>
 
-            <div class="clients-grid">
-                <div class="client-card" onclick="selectClient('sarah')">
-                    <div class="client-avatar" style="background: linear-gradient(135deg, #ff6b6b, #ff8e8e);">S</div>
-                    <h3 class="client-name">Sarah Weber</h3>
-                    <p class="client-situation">Karrierewechsel mit 35</p>
-                    <div class="client-description">
-                        <p><strong>Situation:</strong> Erfolgreiche Marketing-Managerin, die ihre Passion im nachhaltigen Design entdeckt hat. Ängste vor Neustart und finanziellen Einbußen.</p>
-                        <br>
-                        <p><strong>Coaching-Ziel:</strong> Klarheit über Übergangsschritte und Umgang mit Unsicherheit.</p>
+            <div class="client-selection" id="clientCards">
+                <div class="client-card" data-client="sarah">
+                    <h3>👩‍💼 Sarah Weber</h3>
+                    <div class="age">35 Jahre, Marketing-Managerin</div>
+                    <div class="problem">
+                        Steht vor einem wichtigen Karrierewechsel. Nach 10 Jahren im Marketing zieht sie einen Wechsel in den nachhaltigen Sektor in Betracht, ist aber unsicher über die finanziellen Risiken und den richtigen Zeitpunkt.
                     </div>
+                    <div class="goal">🎯 Ziel: Klarheit über Karrierewechsel gewinnen</div>
                 </div>
 
-                <div class="client-card" onclick="selectClient('marcus')">
-                    <div class="client-avatar" style="background: linear-gradient(135deg, #4dabf7, #339af0);">M</div>
-                    <h3 class="client-name">Marcus Hoffmann</h3>
-                    <p class="client-situation">Midlife-Neuorientierung</p>
-                    <div class="client-description">
-                        <p><strong>Situation:</strong> IT-Führungskraft, 48 Jahre, fühlt sich beruflich ausgebrannt. Träumt von eigenem Café, aber Familie ist skeptisch.</p>
-                        <br>
-                        <p><strong>Coaching-Ziel:</strong> Authentische Lebensvision entwickeln und erste Schritte planen.</p>
+                <div class="client-card" data-client="marcus">
+                    <h3>👨‍🔧 Marcus Schmidt</h3>
+                    <div class="age">48 Jahre, Ingenieur</div>
+                    <div class="problem">
+                        Durchlebt eine Midlife-Krise nach 20 Jahren in derselben Firma. Fühlt sich unterfordert und sehnt sich nach neuen Herausforderungen, hat aber Angst vor Veränderungen in seinem Alter.
                     </div>
+                    <div class="goal">🎯 Ziel: Neue Perspektiven und Mut für Veränderung</div>
                 </div>
 
-                <div class="client-card" onclick="selectClient('lisa')">
-                    <div class="client-avatar" style="background: linear-gradient(135deg, #51cf66, #40c057);">L</div>
-                    <h3 class="client-name">Lisa Chen</h3>
-                    <p class="client-situation">Work-Life-Balance</p>
-                    <div class="client-description">
-                        <p><strong>Situation:</strong> Junge Mutter und Startup-Gründerin, kämpft mit Zeitmanagement und Schuldgefühlen. Perfektionismus blockiert Delegation.</p>
-                        <br>
-                        <p><strong>Coaching-Ziel:</strong> Gesunde Grenzen setzen und Prioritäten neu definieren.</p>
+                <div class="client-card" data-client="lisa">
+                    <h3>👩‍⚕️ Dr. Lisa Müller</h3>
+                    <div class="age">42 Jahre, Ärztin</div>
+                    <div class="problem">
+                        Kämpft mit der Balance zwischen ihrer Karriere als Chirurgin und dem Familienleben. Burnout-Symptome machen sich bemerkbar, aber sie liebt ihren Beruf und will nicht aufgeben.
                     </div>
+                    <div class="goal">🎯 Ziel: Nachhaltige Work-Life-Balance finden</div>
                 </div>
 
-                <div class="client-card" onclick="selectClient('werner')">
-                    <div class="client-avatar" style="background: linear-gradient(135deg, #845ec2, #b39ddb);">W</div>
-                    <h3 class="client-name">Werner Müller</h3>
-                    <p class="client-situation">Ruhestand-Übergang</p>
-                    <div class="client-description">
-                        <p><strong>Situation:</strong> Langjähriger Abteilungsleiter, 62 Jahre, steht vor der Rente. Fühlt sich zwischen "endlich frei sein" und Sinnverlust hin- und hergerissen.</p>
-                        <br>
-                        <p><strong>Coaching-Ziel:</strong> Neuen Lebenssinn finden und den Übergang bewusst gestalten.</p>
+                <div class="client-card" data-client="werner">
+                    <h3>👨‍💼 Werner Hoffmann</h3>
+                    <div class="age">62 Jahre, Abteilungsleiter</div>
+                    <div class="problem">
+                        Steht vor dem Ruhestand und schwankt zwischen Vorfreude auf die Freiheit und Angst vor dem Verlust seiner beruflichen Identität. Sucht nach neuen Sinnstiftungen für die Zeit nach der Arbeit.
                     </div>
+                    <div class="goal">🎯 Ziel: Bewussten Übergang in den Ruhestand gestalten</div>
                 </div>
             </div>
 
-            <button class="start-coaching-btn" id="startCoachingBtn" onclick="startCoaching()">
-                🚀 Coaching-Session starten
-            </button>
+            <button id="startButton" class="start-button">🚀 Coaching-Session starten</button>
         </div>
 
-        <!-- Coach Dashboard -->
-        <div class="coach-dashboard" id="coachDashboard">
-            <!-- Dashboard Header -->
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
             <div class="dashboard-header">
-                <div class="client-info">
-                    <div class="client-info-avatar" id="dashboardAvatar">K</div>
-                    <div class="client-details">
-                        <h3 id="dashboardClientName">Klient gewählt</h3>
-                        <p id="dashboardClientSituation">Session aktiv</p>
-                    </div>
-                </div>
-                <div class="session-controls">
-                    <button class="control-btn" onclick="showPrompts()">📚 Prompts</button>
-                    <button class="control-btn" onclick="showAvatarTool()">🎭 Avatar-Tool</button>
-                    <button class="control-btn" onclick="exportSession()">💾 Export</button>
+                <h2 id="sessionTitle">Coaching-Session</h2>
+                <div class="session-info">
+                    <span id="currentTime"></span>
+                    <button class="btn btn-secondary" onclick="exportSession()">📥 Session exportieren</button>
                 </div>
             </div>
 
-            <!-- 12-Schritte Navigation -->
-            <div class="steps-section">
-                <h3 class="steps-title">12 Schritte des triadischen KI-Coachings</h3>
-                <div class="steps-container" id="stepsContainer">
-                    <!-- Steps werden hier eingefügt -->
+            <div class="steps-navigation">
+                <div class="steps-grid" id="stepsGrid">
+                    <!-- Steps werden dynamisch generiert -->
                 </div>
             </div>
 
-            <!-- Main Working Area -->
-            <div class="working-area">
-                <!-- Chat Panel -->
-                <div class="work-panel chat-panel">
-                    <h3 class="panel-header">💬 Coachee Dialog</h3>
-                    <div class="chat-area" id="chatArea">
-                        <!-- Chat messages hier -->
-                    </div>
-                    <div class="chat-inputs">
-                        <textarea class="chat-input-field" id="chatInput" placeholder="Nachricht eingeben..." rows="2"></textarea>
-                        <button class="chat-send-btn" onclick="sendMessage()">Senden</button>
-                    </div>
+            <div class="main-interface">
+                <div class="chat-panel">
+                    <div class="panel-header">💬 Coaching-Gespräch</div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="typing-indicator" id="typingIndicator">KI analysiert...</div>
                 </div>
 
-                <!-- AI Assistant Panel -->
-                <div class="work-panel ai-panel">
-                    <h3 class="panel-header">🤖 KI-Assistent</h3>
-                    <div class="current-step-display" id="stepDisplay">
-                        <div class="step-info">
-                            <h4>Schritt auswählen</h4>
-                            <p class="step-desc">Wählen Sie einen Schritt aus der Navigation oben.</p>
-                        </div>
-                    </div>
+                <div class="ai-panel">
+                    <div class="panel-header">🤖 KI-Assistent</div>
+                    <div class="current-step-info" id="currentStepInfo"></div>
                 </div>
 
-                <!-- Tools Panel -->
-                <div class="work-panel tools-panel">
-                    <h3 class="panel-header">🛠️ Coach-Tools</h3>
-                    
-                    <div class="tool-group">
-                        <h4>🎯 Coaching-Techniken</h4>
-                        <div class="tool-list">
-                            <button class="tool-item">👂 Aktives Zuhören</button>
-                            <button class="tool-item">❓ Offene Fragen</button>
-                            <button class="tool-item">🪞 Paraphrasieren</button>
-                            <button class="tool-item">💭 Emotionen spiegeln</button>
-                        </div>
-                    </div>
-
-                    <div class="tool-group">
-                        <h4>📊 KI-Analyse</h4>
-                        <div class="tool-list">
-                            <button class="tool-item">🔍 Muster erkennen</button>
-                            <button class="tool-item">⚖️ Ausbalancierung</button>
-                            <button class="tool-item">💡 Insights</button>
-                        </div>
-                    </div>
+                <div class="tools-panel">
+                    <div class="panel-header">🛠️ Coach-Tools</div>
+                    <div class="coach-tools" id="coachTools"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Prompt Editor Modal -->
-        <div class="prompt-editor-modal" id="promptEditorModal">
-            <div class="prompt-editor-window">
-                <div class="editor-header">
-                    <h3 class="editor-title">🔧 Prompt-Werkstatt (Kollaborativ)</h3>
-                    <button class="close-editor" onclick="closePromptEditor()">×</button>
+    <!-- Prompt Editor Modal -->
+    <div id="promptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Prompt für KI-Analyse bearbeiten</h3>
+                <button class="close-btn" onclick="closePromptModal()">&times;</button>
+            </div>
+            
+            <div class="screen-share-alert">
+                🔴 Bildschirm wird mit Klient geteilt - Gemeinsam Prompt entwickeln
+            </div>
+
+            <div class="prompt-editor">
+                <label for="promptText">Prompt-Text:</label>
+                <textarea id="promptText" placeholder="Hier wird der Prompt für die KI-Analyse erstellt..."></textarea>
+            </div>
+
+            <div class="variables-section">
+                <h4>Variablen mit Klient anpassen:</h4>
+                <div class="variable-input">
+                    <label>[PROBLEMBESCHREIBUNG]:</label>
+                    <input type="text" id="var1" placeholder="Beschreibung des Hauptproblems...">
                 </div>
-
-                <div class="collaboration-notice">
-                    <strong>💬 Bildschirm-Sharing:</strong> Teilen Sie dieses Fenster mit dem Klienten, damit er mitverfolgen kann, wie Sie den Prompt gemeinsam anpassen. Der Klient sieht nur diesen Arbeitsbereich, nicht Ihre anderen Coach-Tools.
+                <div class="variable-input">
+                    <label>[DETAILS]:</label>
+                    <input type="text" id="var2" placeholder="Weitere wichtige Details...">
                 </div>
-
-                <div class="prompt-work-section">
-                    <div class="work-section-title">
-                        ✏️ Prompt gemeinsam bearbeiten
-                    </div>
-                    <textarea class="prompt-textarea" id="promptTextarea" placeholder="Hier wird der Prompt für diesen Schritt bearbeitet..."></textarea>
-                </div>
-
-                <div class="variables-section">
-                    <div class="variables-title">🔧 Variablen mit Klient-Input ersetzen</div>
-                    <div class="variable-row">
-                        <div class="variable-label">[PROBLEMBESCHREIBUNG] ersetzen durch:</div>
-                        <input type="text" class="variable-input" id="varProblem" placeholder="z.B. Ich zögere immer, wenn ich mein LinkedIn-Profil aktualisieren soll...">
-                    </div>
-                    <div class="variable-row">
-                        <div class="variable-label">[DETAILS] ersetzen durch:</div>
-                        <input type="text" class="variable-input" id="varDetails" placeholder="z.B. Besonders schlimm ist es an freien Nachmittagen...">
-                    </div>
-                    <div class="variable-row">
-                        <div class="variable-label">[ZIELBESCHREIBUNG] ersetzen durch:</div>
-                        <input type="text" class="variable-input" id="varGoal" placeholder="z.B. Selbstbewusst mein berufliches Profil präsentieren...">
-                    </div>
-                </div>
-
-                <div class="editor-actions">
-                    <button class="btn btn-secondary" onclick="resetPrompt()">🔄 Zurücksetzen</button>
-                    <button class="btn btn-primary" onclick="previewFinalPrompt()">👁️ Vorschau</button>
-                    <button class="btn btn-success btn-large" id="sendToKIBtn" onclick="sendPromptToKI()">🚀 An KI senden</button>
+                <div class="variable-input">
+                    <label>[KONTEXT]:</label>
+                    <input type="text" id="var3" placeholder="Situativer Kontext...">
                 </div>
             </div>
-        </div>
 
-        <!-- Screen Share Alert -->
-        <div class="screen-share-alert" id="screenShareAlert">
-            🔴 Bildschirm wird geteilt - Klient kann mitsehen
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="sendToKI()">🚀 An KI senden</button>
+                <button class="btn btn-secondary" onclick="resetPrompt()">🔄 Zurücksetzen</button>
+                <button class="btn btn-secondary" onclick="closePromptModal()">❌ Abbrechen</button>
+            </div>
+
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="spinner"></div>
+                <p>KI analysiert den Prompt...</p>
+            </div>
+
+            <div class="ki-response-section" id="kiResponseSection">
+                <div class="ki-response">
+                    <div class="ki-response-header">
+                        🤖 KI-Analyse Ergebnis:
+                    </div>
+                    <div class="ki-response-text" id="kiResponseText"></div>
+                </div>
+                
+                <div class="response-actions">
+                    <button class="btn btn-primary" onclick="adoptResponse()">✅ Antwort übernehmen</button>
+                    <button class="btn btn-secondary" onclick="editResponse()">✏️ Antwort anpassen</button>
+                    <button class="btn btn-secondary" onclick="retryPrompt()">🔄 Nochmal versuchen</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Global Variables
         let selectedClient = null;
         let currentStep = 1;
-        let completedSteps = [];
-        let currentEditingStep = null;
-        let clientData = null;
-        let isAPIConnected = false;
+        let currentEditingStep = 1;
+        let sessionStartTime = null;
+        let apiConnected = false;
 
-        // API Endpoint - wird automatisch erkannt (lokal vs. deployed)
-        const API_BASE = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : window.location.origin;
-
-        // 12 Schritte Daten
-        const coachingSteps = [
-            { 
-                id: 1, 
-                name: "Einstieg", 
-                desc: "Rapport aufbauen, Anliegen klären", 
-                prompt: "Ich habe folgendes Anliegen: [PROBLEMBESCHREIBUNG]. Kannst du mir helfen, das strukturiert zu durchdenken und erste Lösungsansätze zu entwickeln? Bitte spiegle mir das Anliegen in eigenen Worten und gib mir wertschätzendes Feedback."
+        // Client Data
+        const clients = {
+            sarah: {
+                name: "Sarah Weber",
+                age: "35 Jahre, Marketing-Managerin",
+                problem: "Karrierewechsel-Entscheidung zwischen Sicherheit und Nachhaltigkeit",
+                background: "10 Jahre Marketing-Erfahrung, träumt von nachhaltiger Arbeit"
             },
-            { 
-                id: 2, 
-                name: "Ist/Soll", 
-                desc: "Strukturierte Situationsbeschreibung",
-                prompt: "Hier folgen weitere Informationen zu meiner Situation: [DETAILS]. Bitte erstelle einen strukturierten Bericht in Ich-Form mit zwei Abschnitten: 1. IST-Zustand (was mich derzeit beschäftigt, meine Gefühle und aktuelle Situation) und 2. SOLL-Zustand (wie ich es mir wünsche, meine Ziele)."
+            marcus: {
+                name: "Marcus Schmidt", 
+                age: "48 Jahre, Ingenieur",
+                problem: "Midlife-Krise und Wunsch nach beruflicher Neuorientierung",
+                background: "20 Jahre in derselben Firma, fühlt sich unterfordert"
             },
-            { 
-                id: 3, 
-                name: "Bildarbeit", 
-                desc: "Emotionales Zielbild aktivieren",
-                prompt: "Hier ist eine Bildbeschreibung, die mein Ziel symbolisiert: [ZIELBESCHREIBUNG]. Bitte analysiere die Beziehung zwischen diesem Bild und meinem formulierten Coaching-Ziel. Welche Symbolik erkennst du und wie verbindet sich das Bild mit meinen Zielen?"
+            lisa: {
+                name: "Dr. Lisa Müller",
+                age: "42 Jahre, Ärztin", 
+                problem: "Work-Life-Balance als Chirurgin mit Familie",
+                background: "Burnout-Symptome, liebt ihren Beruf aber Familie leidet"
             },
-            { 
-                id: 4, 
-                name: "Ausbalancierung", 
-                desc: "Innere Konflikte identifizieren",
-                prompt: "Basierend auf allem was bisher besprochen wurde: [PROBLEMBESCHREIBUNG] und [DETAILS]. Identifiziere mögliche Ausbalancierungsprobleme oder innere Konfliktdimensionen. Welche Fragen sollte ich mir stellen, um diese Konflikte besser zu verstehen?"
-            },
-            { 
-                id: 5, 
-                name: "Schlüsselsituation", 
-                desc: "Problemkern erkennen",
-                prompt: "Beschreibe basierend auf meinen Schilderungen die zentrale Schlüsselsituation, in der mein Problem am stärksten auftritt. Was ist der Hauptaffekt (Gefühl), den ich dabei erlebe? Erkenne Muster und Auslöser."
-            },
-            { 
-                id: 6, 
-                name: "Avatar-Interview", 
-                desc: "Inneres Team erkunden",
-                prompt: "Führe ein Interview mit meinem inneren Team durch. Stelle dir vor, es gibt drei Anteile in mir: die Teamchefin (rational, zielorientiert), die Unterstützerin (motivierend, optimistisch) und die Bremse (vorsichtig, warnend). Was würde jeder Anteil zu meinem Anliegen sagen?"
-            },
-            { 
-                id: 7, 
-                name: "KI-Analyse", 
-                desc: "Tiefere Ursachen analysieren",
-                prompt: "Analysiere meine Persönlichkeitsanteile und erstelle ein Ranking der wichtigsten Ausbalancierungsdimensionen für meine Situation. Entwickle ein Ursachenmodell: Wie hängen meine Probleme zusammen?"
-            },
-            { 
-                id: 8, 
-                name: "Entwicklungsziel", 
-                desc: "Übergeordnetes Ziel formulieren",
-                prompt: "Formuliere basierend auf den bisherigen Erkenntnissen ein übergeordnetes Lern- und Entwicklungsziel für mich. Es soll über das konkrete Problem hinausgehen und nachhaltige Veränderung ermöglichen."
-            },
-            { 
-                id: 9, 
-                name: "Widerstände", 
-                desc: "Umsetzungsblockaden antizipieren",
-                prompt: "Identifiziere die inneren Widerstände, die mich bei der Umsetzung meiner Ziele behindern könnten. Welche Ängste und Bedenken haben diese Widerstände? Wie können sie gewürdigt und transformiert werden?"
-            },
-            { 
-                id: 10, 
-                name: "Widerstandsanalyse", 
-                desc: "Glaubenssätze erkennen",
-                prompt: "Extrahiere aus meinen Widerstandsaussagen die zugrundeliegenden negativen Glaubenssätze und inneren Regeln. Entwickle positive alternative Glaubenssätze, die mich stärken."
-            },
-            { 
-                id: 11, 
-                name: "Erfolgsimagination", 
-                desc: "Mentale Erfolgsvorwegnahme",
-                prompt: "Erstelle eine lebhafte Erfolgsimagination in Ich-Form. Zeige den Kontrast zwischen dem alten und neuen Erleben. Beschreibe sinnlich und detailreich, wie es ist, wenn ich mein Ziel erreicht habe. Beziehe mein Zielbild mit ein."
-            },
-            { 
-                id: 12, 
-                name: "Umsetzungsplan", 
-                desc: "Transfer in den Alltag",
-                prompt: "Entwickle einen praktischen Umsetzungsplan mit 5-7 konkreten Maßnahmen, Zeitrahmen und Meilensteinen. Integriere die Erfolgsimagination und schlage Unterstützungsstrukturen vor."
+            werner: {
+                name: "Werner Hoffmann",
+                age: "62 Jahre, Abteilungsleiter",
+                problem: "Übergang in den Ruhestand und neue Lebenssinn-Findung",
+                background: "Jahrzehntelange Führungsrolle, Angst vor Identitätsverlust"
             }
+        };
+
+        // 12 Coaching Steps
+        const coachingSteps = [
+            { id: 1, title: "Ziel & Problem", description: "Klares Coaching-Ziel definieren und Hauptproblem erfassen", prompt: "Als erfahrener Coach-Assistent: Analysiere das Hauptproblem '[PROBLEMBESCHREIBUNG]' mit Kontext '[DETAILS]'. Entwickle präzise Fragen, um ein klares, messbares Coaching-Ziel zu formulieren. Berücksichtige emotionale und praktische Aspekte." },
+            { id: 2, title: "IST-Zustand", description: "Aktuelle Situation detailliert erfassen", prompt: "Erfasse den IST-Zustand detailliert. Situation: '[PROBLEMBESCHREIBUNG]'. Details: '[DETAILS]'. Identifiziere Auswirkungen auf verschiedene Lebensbereiche und emotionale Belastungen." },
+            { id: 3, title: "SOLL-Zustand", description: "Gewünschte Zukunft konkretisieren", prompt: "Entwickle den SOLL-Zustand für '[PROBLEMBESCHREIBUNG]'. Konkrete Vision: Was würde sich im Alltag ändern? Messbare Erfolgskriterien definieren. Kontext: '[KONTEXT]'." },
+            { id: 4, title: "Hindernisse", description: "Blockaden und Widerstände identifizieren", prompt: "Identifiziere systematisch Hindernisse für '[PROBLEMBESCHREIBUNG]'. Interne Blockaden (Ängste, Glaubenssätze) und externe Barrieren. Details: '[DETAILS]'. Priorisiere nach Einfluss." },
+            { id: 5, title: "Ressourcen", description: "Vorhandene Stärken und Möglichkeiten erkennen", prompt: "Analysiere verfügbare Ressourcen für '[PROBLEMBESCHREIBUNG]'. Persönliche Stärken, soziales Netzwerk, materielle Ressourcen. Stärken: '[DETAILS]'. Kontext: '[KONTEXT]'." },
+            { id: 6, title: "Innere Stimmen", description: "Verschiedene Persönlichkeitsanteile erforschen", prompt: "Identifiziere innere Stimmen/Anteile bei '[PROBLEMBESCHREIBUNG]'. Welcher Anteil ist ängstlich, mutig, rational? Innerer Dialog moderieren. Details: '[DETAILS]'." },
+            { id: 7, title: "Optionen", description: "Verschiedene Lösungswege entwickeln", prompt: "Entwickle 4-5 realistische Optionen für '[PROBLEMBESCHREIBUNG]'. Von konservativ bis mutig. Berücksichtige: '[DETAILS]'. Kontext: '[KONTEXT]'. Kreative Alternativen einbeziehen." },
+            { id: 8, title: "Bewertung", description: "Vor- und Nachteile der Optionen abwägen", prompt: "Systematische Pro/Contra-Analyse für '[PROBLEMBESCHREIBUNG]'. Bewertungskriterien: Umsetzbarkeit, Risiko, Erfolgschance, Zeitaufwand. Kriterien: '[DETAILS]'." },
+            { id: 9, title: "Entscheidung", description: "Beste Option auswählen und begründen", prompt: "Unterstütze Entscheidungsfindung für '[PROBLEMBESCHREIBUNG]'. Welche Option passt zu Werten und Zielen? Bauchgefühl vs. Vernunft. Begründung: '[KONTEXT]'." },
+            { id: 10, title: "Maßnahmen", description: "Konkrete Schritte planen", prompt: "Detaillierte Maßnahmenplanung für '[PROBLEMBESCHREIBUNG]'. SMART-Ziele, erste Schritte in 72h. Welche konkreten Aktionen? Timeline: '[DETAILS]'." },
+            { id: 11, title: "Timeline", description: "Zeitplan und Meilensteine festlegen", prompt: "Realistische Timeline für '[PROBLEMBESCHREIBUNG]'. Meilensteine, Deadlines, Pufferzeiten. Wann erste Erfolge sichtbar? Rahmen: '[KONTEXT]'." },
+            { id: 12, title: "Commitment", description: "Verbindlichkeit und nächste Schritte", prompt: "Stärke das Commitment für '[PROBLEMBESCHREIBUNG]'. Accountability-Partner, Belohnungen, Konsequenzen bei Nichtumsetzung. Nächste 3 Schritte: '[DETAILS]'." }
         ];
 
-        // API Connection Check
-        async function checkAPIConnection() {
-            try {
-                const response = await fetch(`${API_BASE}/api/coaching-ai`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        prompt: 'Test', 
-                        stepId: 1 
-                    })
-                });
-                
-                if (response.ok) {
-                    isAPIConnected = true;
-                    updateAPIStatus('connected', '🟢 OpenAI verbunden');
-                } else {
-                    isAPIConnected = false;
-                    updateAPIStatus('fallback', '🟡 Demo-Modus');
-                }
-            } catch (error) {
-                isAPIConnected = false;
-                updateAPIStatus('fallback', '🟡 Demo-Modus');
-            }
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            checkAPIStatus();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+
+        function initializeApp() {
+            // Client Selection Event Listeners
+            const clientCards = document.querySelectorAll('.client-card');
+            clientCards.forEach(card => {
+                card.addEventListener('click', () => selectClient(card.dataset.client));
+            });
+
+            // Start Button Event Listener  
+            document.getElementById('startButton').addEventListener('click', startSession);
+
+            // Generate Steps Navigation
+            generateStepsNavigation();
         }
 
-        function updateAPIStatus(status, text) {
-            const statusEl = document.getElementById('apiStatus');
-            statusEl.className = `api-status ${status}`;
-            statusEl.innerHTML = text;
-        }
-
-        // Client Selection
-        function selectClient(clientKey) {
+        function selectClient(clientId) {
+            // Remove previous selection
             document.querySelectorAll('.client-card').forEach(card => {
                 card.classList.remove('selected');
             });
+
+            // Add selection to clicked card
+            document.querySelector(`[data-client="${clientId}"]`).classList.add('selected');
             
-            event.currentTarget.classList.add('selected');
-            selectedClient = clientKey;
+            selectedClient = clientId;
             
-            const startBtn = document.getElementById('startCoachingBtn');
-            startBtn.classList.add('active');
+            // Activate start button
+            const startButton = document.getElementById('startButton');
+            startButton.classList.add('active');
+            startButton.textContent = `🚀 Session mit ${clients[clientId].name} starten`;
         }
 
-        function startCoaching() {
+        function startSession() {
             if (!selectedClient) return;
+
+            sessionStartTime = new Date();
             
-            const clients = {
-                sarah: { name: 'Sarah Weber', situation: 'Karrierewechsel mit 35', avatar: 'S', color: 'linear-gradient(135deg, #ff6b6b, #ff8e8e)' },
-                marcus: { name: 'Marcus Hoffmann', situation: 'Midlife-Neuorientierung', avatar: 'M', color: 'linear-gradient(135deg, #4dabf7, #339af0)' },
-                lisa: { name: 'Lisa Chen', situation: 'Work-Life-Balance', avatar: 'L', color: 'linear-gradient(135deg, #51cf66, #40c057)' },
-                werner: { name: 'Werner Müller', situation: 'Ruhestand-Übergang', avatar: 'W', color: 'linear-gradient(135deg, #845ec2, #b39ddb)' }
-            };
-            
-            clientData = clients[selectedClient];
-            
+            // Hide client selection, show dashboard
             document.getElementById('clientSelection').style.display = 'none';
-            document.getElementById('coachDashboard').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'block';
             
-            const avatar = document.getElementById('dashboardAvatar');
-            avatar.textContent = clientData.avatar;
-            avatar.style.background = clientData.color;
-            
-            document.getElementById('dashboardClientName').textContent = clientData.name;
-            document.getElementById('dashboardClientSituation').textContent = clientData.situation;
+            // Update session title
+            document.getElementById('sessionTitle').textContent = 
+                `Coaching-Session: ${clients[selectedClient].name}`;
 
-            initializeCoaching();
-        }
-
-        function initializeCoaching() {
-            renderSteps();
-            showStep(1);
-            addChatMessage('coach', 'Hallo! Schön, dass Sie da sind. Erzählen Sie mir, was Sie heute beschäftigt.');
+            // Initialize chat with welcome message
+            addChatMessage('coach', `Hallo ${clients[selectedClient].name}, ich freue mich auf unser Coaching-Gespräch heute. Lassen Sie uns mit Schritt 1 beginnen - der Definition Ihres Coaching-Ziels.`);
             
             setTimeout(() => {
-                addChatMessage('client', 'Hallo... ich bin etwas nervös. Ich stehe vor einer wichtigen Entscheidung und weiß nicht, ob ich den Mut dazu habe.');
+                addChatMessage('client', getClientResponse(1));
             }, 2000);
+
+            // Set current step
+            setCurrentStep(1);
         }
 
-        function renderSteps() {
-            const container = document.getElementById('stepsContainer');
-            container.innerHTML = '';
-            
+        function generateStepsNavigation() {
+            const stepsGrid = document.getElementById('stepsGrid');
+            stepsGrid.innerHTML = '';
+
             coachingSteps.forEach(step => {
-                const stepBtn = document.createElement('button');
-                stepBtn.className = 'step-button';
-                
-                if (step.id === currentStep) {
-                    stepBtn.classList.add('current');
-                }
-                if (completedSteps.includes(step.id)) {
-                    stepBtn.classList.add('done');
-                }
-                
-                stepBtn.onclick = () => showStep(step.id);
-                
-                stepBtn.innerHTML = `
-                    <div class="step-num">${step.id}</div>
-                    <div class="step-name">${step.name}</div>
-                `;
-                
-                container.appendChild(stepBtn);
+                const stepButton = document.createElement('div');
+                stepButton.className = 'step-button';
+                stepButton.dataset.step = step.id;
+                stepButton.innerHTML = `<strong>${step.id}</strong><br>${step.title}`;
+                stepButton.addEventListener('click', () => setCurrentStep(step.id));
+                stepsGrid.appendChild(stepButton);
             });
         }
 
-        function showStep(stepId) {
+        function setCurrentStep(stepId) {
             currentStep = stepId;
+            
+            // Update step buttons
+            document.querySelectorAll('.step-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-step="${stepId}"]`).classList.add('active');
+
+            // Update current step info
             const step = coachingSteps.find(s => s.id === stepId);
-            
-            if (!step) return;
-            
-            renderSteps();
-            
-            const display = document.getElementById('stepDisplay');
-            display.innerHTML = `
-                <div class="step-info">
-                    <h4>Schritt ${step.id}: ${step.name}</h4>
-                    <p class="step-desc">${step.desc}</p>
-                </div>
-                
-                <div class="coach-guide">
-                    <h5>👨‍💼 Coach-Anleitung:</h5>
-                    <p>Führen Sie den Klienten durch diesen Schritt des triadischen Coaching-Prozesses. Nutzen Sie den Prompt als Grundlage für die KI-Unterstützung.</p>
-                </div>
-                
-                <div class="prompt-area">
-                    <h5>🤖 KI-Prompt:</h5>
-                    <div class="prompt-display">${step.prompt}</div>
-                    <div class="action-btns">
-                        <button class="btn btn-primary" onclick="openPromptEditor(${step.id})">✏️ Prompt bearbeiten</button>
-                        <button class="btn btn-success" onclick="sendToAI(${step.id})">🚀 An KI senden</button>
-                    </div>
+            updateCurrentStepInfo(step);
+            updateCoachTools(step);
+        }
+
+        function updateCurrentStepInfo(step) {
+            const stepInfo = document.getElementById('currentStepInfo');
+            stepInfo.innerHTML = `
+                <div class="step-title">Schritt ${step.id}: ${step.title}</div>
+                <div class="step-description">${step.description}</div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="editPrompt(${step.id})">✏️ Prompt bearbeiten</button>
+                    <button class="btn btn-secondary" onclick="skipStep()">⏭️ Schritt überspringen</button>
                 </div>
             `;
         }
 
-        function addChatMessage(sender, text) {
-            const chatArea = document.getElementById('chatArea');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-message from-${sender}`;
-            
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                           now.getMinutes().toString().padStart(2, '0');
-            
-            msgDiv.innerHTML = `
-                <div>${text}</div>
-                <div class="message-time">${timeStr}</div>
+        function updateCoachTools(step) {
+            const coachTools = document.getElementById('coachTools');
+            coachTools.innerHTML = `
+                <div class="tool-section">
+                    <h4>🎯 Aktueller Fokus</h4>
+                    <p>Schritt ${step.id}: ${step.title}</p>
+                </div>
+                <div class="tool-section">
+                    <h4>💡 Coach-Techniken</h4>
+                    <button class="btn btn-secondary" style="width:100%; margin-bottom: 8px;" onclick="addCoachNote('Nachfrage')">❓ Nachfragen</button>
+                    <button class="btn btn-secondary" style="width:100%; margin-bottom: 8px;" onclick="addCoachNote('Spiegelung')">🪞 Spiegeln</button>
+                    <button class="btn btn-secondary" style="width:100%; margin-bottom: 8px;" onclick="addCoachNote('Zusammenfassung')">📝 Zusammenfassen</button>
+                </div>
+                <div class="tool-section">
+                    <h4>📊 Session-Info</h4>
+                    <p>Client: ${selectedClient ? clients[selectedClient].name : 'Nicht gewählt'}</p>
+                    <p>Dauer: <span id="sessionDuration">00:00</span></p>
+                    <p>Schritt: ${step.id}/12</p>
+                </div>
             `;
-            
-            chatArea.appendChild(msgDiv);
-            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            
-            if (!text) return;
-            
-            addChatMessage('client', text);
-            input.value = '';
-            
-            setTimeout(() => {
-                const responses = [
-                    "Das ist eine wichtige Beobachtung. Erzählen Sie mir mehr davon.",
-                    "Wie fühlt sich das für Sie an?",
-                    "Was würde sich ändern, wenn das Problem gelöst wäre?",
-                    "Welche Ressourcen haben Ihnen schon mal geholfen?"
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addChatMessage('coach', randomResponse);
-            }, 1500);
-        }
-
-        // Prompt Editor Functions
-        function openPromptEditor(stepId) {
+        function editPrompt(stepId) {
             currentEditingStep = stepId;
             const step = coachingSteps.find(s => s.id === stepId);
             
-            if (!step) return;
+            // Set prompt in modal
+            document.getElementById('promptText').value = step.prompt;
             
-            document.getElementById('promptTextarea').value = step.prompt;
-            document.getElementById('varProblem').value = '';
-            document.getElementById('varDetails').value = '';
-            document.getElementById('varGoal').value = '';
+            // Clear variables
+            document.getElementById('var1').value = '';
+            document.getElementById('var2').value = '';
+            document.getElementById('var3').value = '';
             
-            document.getElementById('promptEditorModal').style.display = 'block';
-            document.getElementById('screenShareAlert').style.display = 'block';
+            // Hide response section
+            document.getElementById('kiResponseSection').classList.remove('show');
+            
+            // Show modal
+            document.getElementById('promptModal').style.display = 'block';
         }
 
-        function closePromptEditor() {
-            document.getElementById('promptEditorModal').style.display = 'none';
-            document.getElementById('screenShareAlert').style.display = 'none';
-            currentEditingStep = null;
+        function closePromptModal() {
+            document.getElementById('promptModal').style.display = 'none';
         }
 
         function resetPrompt() {
-            if (currentEditingStep) {
-                const step = coachingSteps.find(s => s.id === currentEditingStep);
-                if (step) {
-                    document.getElementById('promptTextarea').value = step.prompt;
-                    document.getElementById('varProblem').value = '';
-                    document.getElementById('varDetails').value = '';
-                    document.getElementById('varGoal').value = '';
-                }
-            }
+            const step = coachingSteps.find(s => s.id === currentEditingStep);
+            document.getElementById('promptText').value = step.prompt;
+            document.getElementById('var1').value = '';
+            document.getElementById('var2').value = '';
+            document.getElementById('var3').value = '';
+            document.getElementById('kiResponseSection').classList.remove('show');
         }
 
-        function previewFinalPrompt() {
-            let promptText = document.getElementById('promptTextarea').value;
-            const problem = document.getElementById('varProblem').value;
-            const details = document.getElementById('varDetails').value;
-            const goal = document.getElementById('varGoal').value;
-            
-            if (problem) promptText = promptText.replace(/\[PROBLEMBESCHREIBUNG\]/g, problem);
-            if (details) promptText = promptText.replace(/\[DETAILS\]/g, details);
-            if (goal) promptText = promptText.replace(/\[ZIELBESCHREIBUNG\]/g, goal);
-            
-            alert('📋 Finaler Prompt:\n\n' + promptText);
-        }
+        async function sendToKI() {
+            const promptText = document.getElementById('promptText').value;
+            const var1 = document.getElementById('var1').value;
+            const var2 = document.getElementById('var2').value;
+            const var3 = document.getElementById('var3').value;
 
-        async function sendPromptToKI() {
-            let promptText = document.getElementById('promptTextarea').value;
-            const problem = document.getElementById('varProblem').value;
-            const details = document.getElementById('varDetails').value;
-            const goal = document.getElementById('varGoal').value;
-            
-            // Variablen ersetzen
-            if (problem) promptText = promptText.replace(/\[PROBLEMBESCHREIBUNG\]/g, problem);
-            if (details) promptText = promptText.replace(/\[DETAILS\]/g, details);
-            if (goal) promptText = promptText.replace(/\[ZIELBESCHREIBUNG\]/g, goal);
-            
-            closePromptEditor();
-            
-            // Loading State
-            const sendBtn = document.getElementById('sendToKIBtn');
-            const originalText = sendBtn.innerHTML;
-            sendBtn.innerHTML = '<span class="loading-spinner"></span> Sende...';
-            sendBtn.disabled = true;
-            
+            // Replace variables in prompt
+            let finalPrompt = promptText
+                .replace(/\[PROBLEMBESCHREIBUNG\]/g, var1 || 'Nicht spezifiziert')
+                .replace(/\[DETAILS\]/g, var2 || 'Keine weiteren Details')
+                .replace(/\[KONTEXT\]/g, var3 || 'Allgemeiner Kontext');
+
+            // Show loading
+            document.getElementById('loadingIndicator').classList.add('show');
+            document.getElementById('kiResponseSection').classList.remove('show');
+
+            // Try real KI first
             try {
-                await sendToAIWithPrompt(currentEditingStep, promptText);
-            } finally {
-                sendBtn.innerHTML = originalText;
-                sendBtn.disabled = false;
-            }
-        }
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), 8000)
+                );
 
-        async function sendToAI(stepId) {
-            const step = coachingSteps.find(s => s.id === stepId);
-            await sendToAIWithPrompt(stepId, step.prompt);
-        }
-
-        async function sendToAIWithPrompt(stepId, prompt) {
-            try {
-                addChatMessage('ai', '<div class="loading">🤖 <span class="loading-spinner"></span> KI analysiert...</div>');
-                
-                const response = await fetch(`${API_BASE}/api/coaching-ai`, {
+                const fetchPromise = fetch('/api/coaching-ai', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        prompt: prompt,
-                        stepId: stepId,
-                        clientName: clientData?.name,
-                        clientSituation: clientData?.situation
+                        prompt: finalPrompt,
+                        step: currentEditingStep,
+                        client: selectedClient
                     })
                 });
 
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
                 const data = await response.json();
                 
-                // Remove loading message
-                const chatArea = document.getElementById('chatArea');
-                const lastMessage = chatArea.lastElementChild;
-                if (lastMessage && lastMessage.innerHTML.includes('loading-spinner')) {
-                    chatArea.removeChild(lastMessage);
+                if (data.error) {
+                    throw new Error(data.error);
                 }
-                
-                if (response.ok) {
-                    addChatMessage('ai', `🤖 ${data.response}`);
-                    
-                    if (data.fallback) {
-                        updateAPIStatus('fallback', '🟡 Demo-Modus');
-                    }
-                } else {
-                    throw new Error(data.error || 'API Error');
-                }
-                
-                // Mark step as completed
-                if (!completedSteps.includes(stepId)) {
-                    completedSteps.push(stepId);
-                    renderSteps();
-                }
-                
+
+                // Success - show real KI response
+                document.getElementById('loadingIndicator').classList.remove('show');
+                document.getElementById('kiResponseText').textContent = data.response;
+                document.getElementById('kiResponseSection').classList.add('show');
+                updateAPIStatus('connected');
+
             } catch (error) {
-                console.error('AI API Error:', error);
-                
-                // Remove loading message
-                const chatArea = document.getElementById('chatArea');
-                const lastMessage = chatArea.lastElementChild;
-                if (lastMessage && lastMessage.innerHTML.includes('loading-spinner')) {
-                    chatArea.removeChild(lastMessage);
-                }
-                
-                // Fallback response
-                const fallbackResponses = {
-                    1: "🤖 **Vielen Dank für Ihr Vertrauen!** [Offline-Modus] Ich höre heraus, dass Sie vor einer wichtigen Entscheidung stehen. Ihre Selbstreflexion ist bereits eine große Stärke.",
-                    2: "🤖 **Strukturierte Analyse** [Offline-Modus]: IST-Zustand zeigt äußeren Erfolg, aber innere Unzufriedenheit. SOLL-Zustand: Authentische, erfüllende Tätigkeit.",
-                    3: "🤖 **Bildsymbolik-Analyse** [Offline-Modus]: Das gewählte Bild symbolisiert neue Perspektiven und Möglichkeiten."
-                };
-                
-                const fallbackResponse = fallbackResponses[stepId] || 
-                    `🤖 [Offline-Modus] Analyse für Schritt ${stepId}. In der Live-Version würde hier eine detaillierte KI-Antwort erscheinen.`;
-                
-                addChatMessage('ai', fallbackResponse);
-                updateAPIStatus('fallback', '🔴 Offline-Modus');
+                // Fallback to high-quality demo response
+                document.getElementById('loadingIndicator').classList.remove('show');
+                const fallbackResponse = generateSmartFallbackResponse(currentEditingStep, selectedClient, var1, var2, var3);
+                document.getElementById('kiResponseText').textContent = fallbackResponse;
+                document.getElementById('kiResponseSection').classList.add('show');
+                updateAPIStatus('demo');
+                console.log('Using intelligent fallback response:', error.message);
             }
         }
 
-        // Tool Functions
-        function showPrompts() {
-            alert('📚 Prompt-Repository\n\nIn der vollständigen Version stehen hier 83+ spezialisierte Coaching-Prompts zur Verfügung, kategorisiert nach Coaching-Phasen und Anwendungsgebieten.');
-        }
+        function generateSmartFallbackResponse(step, client, var1, var2, var3) {
+            const clientName = clients[client].name;
+            const problem = var1 || clients[client].problem;
+            const details = var2 || clients[client].background;
+            
+            const smartResponses = {
+                1: `**Coaching-Ziel für ${clientName} definieren:**
 
-        function showAvatarTool() {
-            alert('🎭 Avatar-Tool\n\nHier würde das Tool für "Inneres Team" Aufstellungen starten. Klienten können virtuelle Avatare für ihre verschiedenen Persönlichkeitsanteile aufstellen und Interviews führen.');
-        }
+Basierend auf "${problem}" erkenne ich folgende Kernthemen:
+• Hauptherausforderung: ${problem}
+• Kontext: ${details}
 
-        function exportSession() {
-            const sessionData = {
-                client: clientData,
-                completedSteps: completedSteps,
-                chatHistory: Array.from(document.querySelectorAll('.chat-message')).map(msg => ({
-                    sender: msg.className.split('from-')[1],
-                    text: msg.querySelector('div').textContent,
-                    time: msg.querySelector('.message-time')?.textContent
-                })),
-                timestamp: new Date().toISOString()
+**Präzise Coaching-Fragen:**
+1. "Wenn Sie in 6 Monaten zurückblicken - was muss sich konkret verändert haben, damit Sie sagen: 'Das Coaching war erfolgreich'?"
+2. "Auf einer Skala von 1-10: Wie klar ist Ihnen aktuell der nächste Schritt?"
+3. "Was wäre das Schlimmste, was passieren könnte, wenn Sie nichts ändern?"
+
+**Messbares Ziel:** Eine klare Entscheidung mit konkretem Umsetzungsplan in den nächsten 4 Wochen.`,
+
+                2: `**IST-Zustand Analyse für ${clientName}:**
+
+**Aktuelle Situation:**
+• Hauptbelastung: ${problem}
+• Hintergrund: ${details}
+
+**Auswirkungen auf verschiedene Lebensbereiche:**
+• Beruflich: Unzufriedenheit und fehlende Erfüllung
+• Emotional: Innerer Konflikt zwischen Sicherheit und Wachstum
+• Sozial: Möglicherweise Spannungen im persönlichen Umfeld
+• Gesundheit: Stress durch ungelöste Entscheidung
+
+**Emotionale Bewertung:** Frustration, Ungewissheit, aber auch Hoffnung auf Veränderung.
+**Dringlichkeit:** Mittel bis hoch - die Belastung steigt.`,
+
+                3: `**SOLL-Zustand Vision für ${clientName}:**
+
+**Konkrete Zukunftsvision:**
+Wenn "${problem}" gelöst wäre, sähe der Alltag so aus:
+• Morgens: Motivation und Vorfreude auf den Arbeitstag
+• Beruflich: Sinnvolle Tätigkeit, die mit persönlichen Werten übereinstimmt
+• Emotional: Innere Ruhe und Selbstvertrauen in Entscheidungen
+• Finanziell: Nachhaltige Sicherheit bei erfüllender Arbeit
+
+**Messbare Erfolgskriterien:**
+1. Klarheit über berufliche Richtung (bis in 4 Wochen)
+2. Konkrete erste Schritte definiert (bis in 6 Wochen)
+3. Stress-Level reduziert von aktuell 8/10 auf 4/10
+4. Stolz auf getroffene Entscheidung`,
+
+                4: `**Hindernis-Analyse für ${clientName}:**
+
+**Interne Blockaden:**
+• Verlustangst: "Was, wenn ich die falsche Entscheidung treffe?"
+• Perfektionismus: Warten auf den "perfekten" Moment
+• Glaubenssatz: "Sicherheit geht vor Erfüllung"
+• Selbstzweifel: "Bin ich gut genug für etwas Neues?"
+
+**Externe Barrieren:**
+• Finanzielle Verpflichtungen
+• Erwartungen des sozialen Umfelds
+• Marktbedingungen im Zielbereich
+• Zeitliche Constraints
+
+**Prioritäts-Ranking:**
+1. Verlustangst (höchster Einfluss)
+2. Finanzielle Sicherheit
+3. Selbstzweifel
+4. Äußere Erwartungen`,
+
+                5: `**Ressourcen-Inventar für ${clientName}:**
+
+**Persönliche Stärken:**
+• 10+ Jahre Berufserfahrung als solide Basis
+• Bewusstsein für persönliche Werte (Nachhaltigkeit/Erfüllung)
+• Mut, überhaupt eine Veränderung zu erwägen
+• Analytische Fähigkeiten für Entscheidungsfindung
+
+**Soziales Netzwerk:**
+• Berufliche Kontakte in verschiedenen Branchen
+• Familie/Freunde als emotionale Unterstützung
+• Potentielle Mentoren im Zielbereich
+
+**Materielle Ressourcen:**
+• Finanzielle Rücklagen für Übergangszeit
+• Marktgängige Qualifikationen
+• Digitale Tools für Networking und Weiterbildung
+
+**Verfügbare Zeit:** ${details.includes('unterfordert') ? 'Freiräume durch Unterforderung' : 'Abends/Wochenenden für Vorbereitung'}`,
+
+                6: `**Innere Stimmen Analyse für ${clientName}:**
+
+**Identifizierte Anteile:**
+1. **Der Sicherheits-Wächter:** "Bleib, wo du bist - es ist sicher hier!"
+2. **Der Träumer:** "Du könntest so viel mehr erreichen!"
+3. **Der Kritiker:** "Andere schaffen das, warum zögerst du?"
+4. **Der Weise:** "Welcher Weg führt zu echter Erfüllung?"
+
+**Innerer Dialog:**
+Sicherheits-Wächter vs. Träumer: Konstanter Kampf zwischen Risiko und Chance
+Der Kritiker verstärkt den Druck, während der Weise nach Balance sucht.
+
+**Moderations-Ansatz:**
+- Alle Stimmen anhören und würdigen
+- Gemeinsame Werte identifizieren
+- Kompromiss-Lösungen entwickeln
+- Den Weisen als Mediator stärken`,
+
+                7: `**Lösungsoptionen für ${clientName}:**
+
+**Option 1 - Sanfter Übergang:**
+Schrittweise Reduzierung der aktuellen Rolle, parallel Aufbau im Zielbereich
+Pro: Geringeres Risiko | Contra: Langsamerer Fortschritt
+
+**Option 2 - Kompletter Wechsel:**
+Kündigung und Vollzeit-Einstieg in neuen Bereich
+Pro: Schnelle Klarheit | Contra: Höheres finanzielles Risiko
+
+**Option 3 - Sabbatical/Auszeit:**
+3-6 Monate Pause zur Orientierung und Weiterbildung
+Pro: Zeit für Reflexion | Contra: Einkommensverlust
+
+**Option 4 - Interne Neuorientierung:**
+Neue Projekte/Abteilung im aktuellen Unternehmen
+Pro: Sicherheit + Veränderung | Contra: Begrenzte Möglichkeiten
+
+**Option 5 - Hybridmodell:**
+Teilzeit aktueller Job + Teilzeit neuer Bereich
+Pro: Beste aus beiden Welten | Contra: Hohe Arbeitsbelastung`,
+
+                8: `**Pro/Contra Analyse für ${clientName}:**
+
+**Bewertungskriterien gewichtet:**
+- Umsetzbarkeit (25%)
+- Finanzielles Risiko (30%) 
+- Erfüllungspotential (25%)
+- Zeitaufwand (20%)
+
+**Option-Bewertung (1-5 Sterne):**
+
+**Sanfter Übergang:** ⭐⭐⭐⭐
++ Machbar und risikoarm
+- Dauert länger bis zur Erfüllung
+
+**Kompletter Wechsel:** ⭐⭐⭐
++ Maximale Erfüllung
+- Hohes finanzielles Risiko
+
+**Sabbatical:** ⭐⭐⭐⭐
++ Zeit für fundierte Entscheidung
+- Temporärer Einkommensverlust
+
+**Empfehlung:** Hybrid aus sanftem Übergang mit geplanter Auszeit zur Weiterbildung`,
+
+                9: `**Entscheidungs-Unterstützung für ${clientName}:**
+
+**Bauchgefühl vs. Vernunft:**
+- Bauchgefühl sagt: "${problem.includes('unterfordert') ? 'Zeit für Veränderung!' : 'Erfüllung ist wichtig!'}"
+- Vernunft sagt: "Sicherheit nicht leichtfertig aufgeben"
+
+**Werte-Abgleich:**
+Die Option "Sanfter Übergang" passt am besten zu Ihren Kernwerten:
+• Nachhaltigkeit (auch in der Lebensplanung)
+• Verantwortung (für finanzielle Verpflichtungen)
+• Wachstum (persönliche Entwicklung)
+
+**Entscheidungs-Impuls:**
+"Was würde das 80-jährige Ich Ihnen raten?"
+Wahrscheinlich: "Hab Mut, aber sei klug dabei."
+
+**Empfehlung:** Starten Sie in den nächsten 2 Wochen mit der Vorbereitung für den sanften Übergang.`,
+
+                10: `**Maßnahmenplan für ${clientName}:**
+
+**72-Stunden-Aktionen:**
+1. Finanzcheck: Wie lange können Sie ohne aktuelles Gehalt leben?
+2. Netzwerk aktivieren: 3 Kontakte im Zielbereich kontaktieren
+3. Skill-Gap-Analyse: Welche Qualifikationen fehlen noch?
+
+**SMART-Ziele (nächste 4 Wochen):**
+- **S**pezifisch: 10 informative Gespräche mit Profis im Zielbereich
+- **M**essbar: Bewerbungsunterlagen für neue Richtung erstellen
+- **A**ttraktiv: Vision Board für neuen Lebensabschnitt
+- **R**ealistisch: Parallele Weiterbildung starten
+- **T**erminiert: Bis [Datum in 4 Wochen]
+
+**Erste konkrete Schritte:**
+1. LinkedIn-Profil aktualisieren
+2. Branchenveranstaltungen recherchieren
+3. Finanzberater Termin vereinbaren`,
+
+                11: `**Timeline für ${clientName}:**
+
+**Phase 1 (Woche 1-4): Vorbereitung**
+- Netzwerk aktivieren und informative Gespräche
+- Skill-Assessment und Weiterbildungsplan
+- Finanzielle Planung
+
+**Phase 2 (Woche 5-12): Orientierung**
+- Praktika/Hospitationen im Zielbereich
+- Erste Bewerbungen/Sondierungen
+- Reduzierung aktueller Belastung
+
+**Phase 3 (Woche 13-26): Übergang**
+- Konkrete Angebote evaluieren
+- Verhandlungen mit aktuellem AG
+- Schrittweise Übergabe
+
+**Meilensteine:**
+✓ Woche 2: Klarheit über Zielbereich
+✓ Woche 6: Erste konkrete Kontakte
+✓ Woche 12: Machbare Option identifiziert
+✓ Woche 20: Entscheidung getroffen
+✓ Woche 26: Übergang vollzogen
+
+**Pufferzeiten:** +2 Wochen pro Phase für unvorhergesehene Ereignisse`,
+
+                12: `**Commitment-Stärkung für ${clientName}:**
+
+**Accountability-System:**
+- **Partner:** Vertraute Person als wöchentlicher Check-in
+- **Coach:** Monatliche Zwischenreflexion
+- **Selbst:** Tägliches 5-Minuten-Journal zum Fortschritt
+
+**Belohnungen bei Meilenstei-Erreichung:**
+• Woche 4: Besonderes Dinner in Lieblingsrestaurant
+• Woche 12: Wellness-Wochenende
+• Woche 26: Kurzurlaub zur Feier des Übergangs
+
+**Konsequenzen bei Stillstand:**
+- Nach 2 Wochen ohne Fortschritt: Ehrliche Reflexion mit Accountability-Partner
+- Öffentliches Commitment (Familie/Freunde informieren)
+- Professionelle Coaching-Unterstützung intensivieren
+
+**Nächste 3 konkrete Schritte:**
+1. **Heute:** Accountability-Partner bestimmen und kontaktieren
+2. **Diese Woche:** Ersten informativen Gesprächstermin vereinbaren  
+3. **Bis Ende Monat:** Detaillierteren Finanzplan erstellen
+
+**Commitment-Satz:** "Ich verpflichte mich, in den nächsten 6 Monaten konkrete Schritte für meine berufliche Erfüllung zu gehen, auch wenn es bedeutet, meine Komfortzone zu verlassen."`
             };
             
-            const dataStr = JSON.stringify(sessionData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `coaching-session-${clientData?.name || 'export'}-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            URL.revokeObjectURL(url);
+            return smartResponses[step] || `**Professionelle Coaching-Analyse - Schritt ${step}**
+
+Für ${clientName} mit der Herausforderung "${problem}" empfehle ich:
+
+${step <= 4 ? 'In dieser Analysephase' : step <= 8 ? 'In dieser Entwicklungsphase' : 'In dieser Umsetzungsphase'} ist es wichtig, systematisch vorzugehen. 
+
+Basierend auf den Angaben "${details}" sehe ich folgende Schwerpunkte:
+• Strukturierte Herangehensweise an die Problemstellung
+• Berücksichtigung emotionaler und praktischer Aspekte  
+• Entwicklung konkreter, umsetzbarer Lösungsschritte
+
+**Nächste Schritte:** Vertiefen Sie die Reflexion mit gezielten Fragen und entwickeln Sie gemeinsam mit Ihrem Klienten praktikable Ansätze.
+
+*Diese Demo-Antwort zeigt die Art der KI-Unterstützung. In der Live-Version würden hier noch detailliertere, personalisierte Analysen erscheinen.*`;
         }
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check API connection on load
-            checkAPIConnection();
+        function adoptResponse() {
+            const response = document.getElementById('kiResponseText').textContent;
+            addChatMessage('ai', response);
+            closePromptModal();
             
-            // Chat input Enter key
-            const chatInput = document.getElementById('chatInput');
-            if (chatInput) {
-                chatInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                });
-            }
-
-            // Close modals on outside click
-            window.onclick = function(event) {
-                const modal = document.getElementById('promptEditorModal');
-                if (event.target === modal) {
-                    closePromptEditor();
+            // Auto-proceed to next step after a delay
+            setTimeout(() => {
+                if (currentStep < 12) {
+                    setCurrentStep(currentStep + 1);
                 }
+            }, 1000);
+        }
+
+        function editResponse() {
+            // Allow editing of the response
+            const responseDiv = document.getElementById('kiResponseText');
+            const currentText = responseDiv.textContent;
+            responseDiv.innerHTML = `<textarea style="width:100%; height:200px; padding:15px; border: 2px solid #667eea; border-radius:10px; font-family:inherit; line-height:1.6;">${currentText}</textarea>`;
+        }
+
+        function retryPrompt() {
+            sendToKI();
+        }
+
+        function addChatMessage(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const timestamp = new Date().toLocaleTimeString('de-DE', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="timestamp">${timestamp}</div>
+                <div class="text">${message}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Show typing indicator for client responses
+            if (sender === 'coach') {
+                setTimeout(() => {
+                    showTypingIndicator();
+                }, 1000);
             }
-        });
-    </script>
-</body>
-</html>
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('typingIndicator').classList.remove('show');
+            }, 2000);
+        }
+
+        function getClientResponse(step) {
+            const responses = {
+                sarah: {
+                    1: "Ja, das ist genau mein Problem. Ich bin wirklich unsicher, ob ich den Wechsel in den nachhaltigen Sektor wagen soll. Einerseits habe ich eine sichere Position, andererseits fühle ich mich nicht mehr erfüllt und möchte etwas Sinnvolles machen.",
+                    2: "Aktuell bin ich Marketing-Managerin in einem großen Konzern. Das Gehalt ist gut, aber ich arbeite für Produkte, hinter denen ich nicht wirklich stehe. Das belastet mich zunehmend und ich merke, dass ich immer unzufriedener werde."
+                },
+                marcus: {
+                    1: "Ich fühle mich seit Monaten unzufrieden und irgendwie gefangen. 20 Jahre in derselben Firma - das war mal mein Traumjob, aber jetzt langweile ich mich und sehe keine Perspektive mehr für mich.",
+                    2: "Meine Aufgaben sind Routine geworden. Ich mache sie mit links, aber dabei fühle ich mich leer und unterfordert. Gleichzeitig habe ich Angst, in meinem Alter nochmal von vorne anzufangen."
+                },
+                lisa: {
+                    1: "Die Balance zwischen Karriere und Familie wird immer schwieriger. Ich liebe meinen Beruf als Chirurgin, aber die Familie leidet darunter
