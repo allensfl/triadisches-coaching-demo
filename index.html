@@ -895,32 +895,50 @@
 
         function selectClient(clientId) {
             console.log('Selecting client:', clientId);
+            console.log('Available clients:', Object.keys(clients));
+            console.log('Client data:', clients[clientId]);
             
-            if (!clientId || !clients[clientId]) {
-                console.error('Invalid client ID:', clientId);
+            if (!clientId) {
+                console.error('No client ID provided');
+                return;
+            }
+            
+            if (!clients[clientId]) {
+                console.error('Client not found:', clientId);
+                console.error('Available clients:', Object.keys(clients));
                 return;
             }
             
             // Remove previous selection
-            document.querySelectorAll('.client-card').forEach(card => {
+            const allCards = document.querySelectorAll('.client-card');
+            console.log('Found cards for deselection:', allCards.length);
+            allCards.forEach(card => {
                 card.classList.remove('selected');
             });
 
             // Add selection to clicked card
             const selectedCard = document.querySelector(`[data-client="${clientId}"]`);
+            console.log('Found selected card:', selectedCard);
             if (selectedCard) {
                 selectedCard.classList.add('selected');
                 console.log('Client card selected:', clientId);
+            } else {
+                console.error('Could not find card with data-client:', clientId);
             }
             
             selectedClient = clientId;
+            console.log('Global selectedClient set to:', selectedClient);
             
             // Activate start button
             const startButton = document.getElementById('startButton');
+            console.log('Found start button:', startButton);
             if (startButton) {
                 startButton.classList.add('active');
                 startButton.textContent = `🚀 Session mit ${clients[clientId].name} starten`;
-                console.log('Start button activated');
+                console.log('Start button activated with text:', startButton.textContent);
+                console.log('Start button classes:', startButton.className);
+            } else {
+                console.error('Start button not found!');
             }
         }
 
