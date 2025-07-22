@@ -1,13 +1,6 @@
 {
   "version": 2,
-  "name": "triadisches-coaching-demo",
-  "alias": ["triadisches-coaching-demo.vercel.app"],
-  
-  "build": {
-    "env": {
-      "NODE_VERSION": "18.x"
-    }
-  },
+  "name": "coachingdemo",
   
   "functions": {
     "api/**/*.js": {
@@ -99,18 +92,5 @@
     }
   ],
   
-  "env": [
-    "OPENAI_API_KEY",
-    "CLAUDE_API_KEY", 
-    "RATE_LIMIT_MAX",
-    "DEMO_MODE"
-  ],
-  
-  "regions": ["fra1", "iad1"],
-  
-  "framework": null,
-  "installCommand": null,
-  "buildCommand": null,
-  "devCommand": null,
-  "outputDirectory": null
+  "regions": ["fra1", "iad1"]
 }
