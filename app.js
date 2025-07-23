@@ -5,6 +5,12 @@ let currentEditingStep = 1;
 let sessionStartTime = null;
 let sessionNotes = [];
 let sessionId = null;
+let collaborationData = {
+    prompt: '',
+    response: '',
+    loading: false,
+    timestamp: null
+};
 
 // Check if we're in collaboration mode
 const urlParams = new URLSearchParams(window.location.search);
@@ -68,7 +74,20 @@ function copyCollaborationLink() {
 
 function openCollaborationWindow() {
     const collaborationUrl = document.getElementById('collaborationLink').textContent;
-    window.open(collaborationUrl, 'CoachingCollaboration', 'width=900,height=700,scrollbars=yes,resizable=yes');
+    const newWindow = window.open(collaborationUrl, 'CoachingCollaboration', 'width=900,height=700,scrollbars=yes,resizable=yes');
+    
+    // Store reference for communication
+    window.collaborationWindow = newWindow;
+    
+    // Setup message listener for cross-window communication
+    window.addEventListener('message', function(event) {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'collaborationUpdate') {
+            // Update our local data
+            collaborationData = event.data.data;
+        }
+    });
 }
 
 // Collaboration Mode Functions
@@ -79,25 +98,25 @@ function initCollaborationMode() {
         sessionIdElement.textContent = sessionParam || 'DEMO';
     }
     
-    startCollaborationListener();
-}
-
-function startCollaborationListener() {
-    setInterval(() => {
-        checkForCollaborationUpdates();
-    }, appConfig.collaboration.syncInterval);
-}
-
-function checkForCollaborationUpdates() {
-    try {
-        const collaborationData = localStorage.getItem('collaborationData');
-        if (collaborationData) {
-            const data = JSON.parse(collaborationData);
-            updateCollaborationDisplay(data);
+    // Start listening for messages from parent window
+    window.addEventListener('message', function(event) {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'collaborationData') {
+            updateCollaborationDisplay(event.data.data);
         }
-    } catch (e) {
-        console.warn('Collaboration sync error:', e);
-    }
+    });
+    
+    // For demo purposes: simulate some initial data after 2 seconds
+    setTimeout(() => {
+        if (!collaborationData.prompt) {
+            updateCollaborationDisplay({
+                prompt: 'Demo: Warten auf ersten Prompt vom Coach...',
+                response: '',
+                loading: false
+            });
+        }
+    }, 2000);
 }
 
 function updateCollaborationDisplay(data) {
@@ -112,19 +131,39 @@ function updateCollaborationDisplay(data) {
         `;
     }
     
-    if (data.response && responseElement) {
-        responseElement.innerHTML = `
-            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #10b981;">
-                ${data.response}
-            </div>
-        `;
-    } else if (data.loading && responseElement) {
+    if (data.loading && responseElement) {
         responseElement.innerHTML = `
             <div class="loading-state">
                 <div class="spinner"></div>
                 <p>KI analysiert den Prompt...</p>
             </div>
         `;
+    } else if (data.response && responseElement) {
+        responseElement.innerHTML = `
+            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #10b981;">
+                ${data.response}
+            </div>
+        `;
+    }
+}
+
+// Broadcast data to collaboration window
+function broadcastToCollaboration(data) {
+    collaborationData = { ...collaborationData, ...data, timestamp: new Date() };
+    
+    // Send to collaboration window if open
+    if (window.collaborationWindow && !window.collaborationWindow.closed) {
+        window.collaborationWindow.postMessage({
+            type: 'collaborationData',
+            data: collaborationData
+        }, window.location.origin);
+    }
+    
+    // Also store in localStorage as fallback
+    try {
+        localStorage.setItem('collaborationData', JSON.stringify(collaborationData));
+    } catch (e) {
+        console.warn('Could not save collaboration data:', e);
     }
 }
 
@@ -178,6 +217,13 @@ function startSession() {
     // Set current step and add welcome note
     setCurrentStep(1);
     addSystemNote('Demo-Session gestartet mit ' + clients[selectedClient].name, 'custom');
+    
+    // Broadcast session start to collaboration window
+    broadcastToCollaboration({
+        prompt: `Demo-Session gestartet mit ${clients[selectedClient].name}\n\nErster Schritt: Ziel & Problem definieren\n\nWarten auf Coach-Prompt...`,
+        response: '',
+        loading: false
+    });
 }
 
 // Steps Navigation
@@ -255,6 +301,7 @@ function updateCoachTools(step) {
             <p style="font-size: 0.8em;">Schritt: ${step.id}/12</p>
             <p style="font-size: 0.8em;">Notizen: ${sessionNotes.length}</p>
             <p style="font-size: 0.8em;">Session: ${sessionId || 'Nicht gestartet'}</p>
+            <p style="font-size: 0.8em;">Sync: ${window.collaborationWindow && !window.collaborationWindow.closed ? '🟢 Aktiv' : '🟡 Bereit'}</p>
         </div>
     `;
 }
@@ -447,16 +494,11 @@ function updateCollaborationPrompt() {
         .replace(/\[DETAILS\]/g, var2 || '[Details: werden noch ergänzt]')
         .replace(/\[KONTEXT\]/g, var3 || '[Kontext: wird noch spezifiziert]');
 
-    // Save to localStorage for collaboration window
-    try {
-        localStorage.setItem('collaborationData', JSON.stringify({
-            prompt: finalPrompt,
-            timestamp: new Date(),
-            step: currentEditingStep
-        }));
-    } catch (e) {
-        console.warn('Could not save collaboration data:', e);
-    }
+    // Broadcast to collaboration window
+    broadcastToCollaboration({
+        prompt: finalPrompt,
+        loading: false
+    });
 }
 
 function closePromptModal() {
@@ -499,14 +541,12 @@ async function sendCollaborativePromptToKI() {
     const responseSection = document.getElementById('kiResponseSection');
     if (responseSection) responseSection.style.display = 'none';
     
-    // Update collaboration window with loading state
-    try {
-        localStorage.setItem('collaborationData', JSON.stringify({
-            prompt: finalPrompt,
-            loading: true,
-            timestamp: new Date()
-        }));
-    } catch (e) {}
+    // Broadcast loading state
+    broadcastToCollaboration({
+        prompt: finalPrompt,
+        loading: true,
+        response: ''
+    });
 
     try {
         // Simulate API call with realistic delay
@@ -521,14 +561,12 @@ async function sendCollaborativePromptToKI() {
         
         if (responseSection) responseSection.style.display = 'block';
         
-        // Update collaboration window with response
-        try {
-            localStorage.setItem('collaborationData', JSON.stringify({
-                prompt: finalPrompt,
-                response: response,
-                timestamp: new Date()
-            }));
-        } catch (e) {}
+        // Broadcast response to collaboration window
+        broadcastToCollaboration({
+            prompt: finalPrompt,
+            response: response,
+            loading: false
+        });
         
     } catch (error) {
         console.error('KI request error:', error);
@@ -541,6 +579,11 @@ async function sendCollaborativePromptToKI() {
         }
         
         if (responseSection) responseSection.style.display = 'block';
+        
+        broadcastToCollaboration({
+            response: 'Fehler bei der KI-Anfrage. Bitte versuchen Sie es erneut.',
+            loading: false
+        });
     }
 }
 
@@ -602,7 +645,8 @@ function adoptCollaborativeResponse() {
         <br><br><strong>Nächste Schritte:</strong><br>
         • Reaktion abwarten und spiegeln<br>
         • Einen Aspekt vertiefen<br>
-        • Bei Bedarf konkretisieren`;
+        • Bei Bedarf konkretisieren<br><br>
+        <strong>Sync-Status:</strong> ${window.collaborationWindow && !window.collaborationWindow.closed ? '🟢 Live synchronisiert' : '🟡 Bereit für Kollaboration'}`;
     }
     
     closePromptModal();
@@ -640,7 +684,7 @@ function closeExportModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// Export Functions
+// Export Functions (Rest of the functions remain the same as before...)
 function exportNotes() {
     if (sessionNotes.length === 0) {
         alert('Keine Notizen zum Exportieren vorhanden.');
@@ -683,13 +727,8 @@ function exportSession() {
         notes: sessionNotes,
         collaboration: {
             linkGenerated: !!sessionId,
-            collaborationData: (() => {
-                try {
-                    return JSON.parse(localStorage.getItem('collaborationData') || '{}');
-                } catch (e) {
-                    return {};
-                }
-            })()
+            collaborationData: collaborationData,
+            windowOpen: !!(window.collaborationWindow && !window.collaborationWindow.closed)
         },
         messages: Array.from(document.querySelectorAll('.message')).map(msg => ({
             sender: msg.className.replace('message ', ''),
@@ -715,7 +754,8 @@ function exportDemo() {
     report += `**Demo-Klient:** ${selectedClient ? clients[selectedClient].name : 'Nicht gewählt'}\n`;
     report += `**Session-ID:** ${sessionId}\n`;
     report += `**Demo-Dauer:** ${sessionDuration} Minuten\n`;
-    report += `**Durchgeführte Schritte:** ${currentStep}/12\n\n`;
+    report += `**Durchgeführte Schritte:** ${currentStep}/12\n`;
+    report += `**Kollaboration:** ${window.collaborationWindow && !window.collaborationWindow.closed ? '✅ Aktiv getestet' : '🟡 Vorbereitet'}\n\n`;
     
     report += `## ✅ Getestete Kernfunktionen:\n\n`;
     report += `**🔗 Triadisches Coaching:** Coach + Klient + KI in separaten Fenstern\n`;
@@ -856,6 +896,12 @@ document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
         e.preventDefault();
         addQuickNote('custom');
+    }
+    
+    // Ctrl+O: Open collaboration window
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+        e.preventDefault();
+        openCollaborationWindow();
     }
 });
 
